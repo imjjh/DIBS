@@ -1,6 +1,27 @@
 spring:
   application:
     name: TicketLock
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            client-authentication-method: client_secret_post # 카카오는 post 방식 필수
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao" # 설정한 것과 동일
+            scope:
+              - profile_nickname
+              - account_email
+            client-name: Kakao
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id # 카카오의 고유 식별자 필드명은 'id' 입니다.
 
   datasource:
     url: jdbc:mysql://localhost:3306/ticketlock?serverTimezone=UTC&useSSL=false
@@ -10,3 +31,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  expiration: 86400000
