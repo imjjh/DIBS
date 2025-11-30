@@ -1,0 +1,21 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: ticketlock-mysql
+    restart: unless-stopped # 직접 중지 않는 한 자동 재시작
+    ports:
+      - "3307:3306"
+    env_file:
+      - .env.local
+    environment:
+      TZ: Asia/Seoul   # 컨테이너 전체 시간대 설정
+    volumes:
+      - ticketlock-db:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d # mysql 컨테이너가 처음 시작될 떄 자동으로 실행 되는 sql 스크립트 디렉토리
+    command:
+      - --character-set-server=utf8mb4 # 한글 관련
+      - --collation-server=utf8mb4_unicode_ci # 한글 관련
+      - --default-time-zone=+09:00   # MySQL 서버 타임존 설정
+
+volumes:
+  ticketlock-db:

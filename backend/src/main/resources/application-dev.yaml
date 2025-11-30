@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&useSSL=false
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
