@@ -13,7 +13,7 @@ spring:
             redirect-uri: "http://localhost:8080/login/oauth2/code/kakao" # 설정한 것과 동일
             scope:
               - profile_nickname
-              - account_email
+#              - account_email
             client-name: Kakao
 
         provider:
@@ -28,9 +28,7 @@ spring:
     username: your_user
     password: your_pass
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
+
 
 jwt:
   secret: ${JWT_SECRET_KEY}
