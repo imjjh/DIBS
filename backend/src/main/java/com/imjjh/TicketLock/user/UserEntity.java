@@ -1,0 +1,64 @@
+package com.imjjh.TicketLock.user;
+
+import com.imjjh.TicketLock.common.BaseTimeEntity;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 유저 엔티티 클래스
+ *
+ */
+@Entity
+@NoArgsConstructor
+@Getter
+public class UserEntity extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length=100)
+    private String provider; // kakao, naver
+
+    @Column(length = 100, unique = true)
+    private String providerId; // kakaoId, naverId
+
+    @Column(length = 100)
+    private String nickName;
+
+    @Column(length = 100)
+    private String username;
+
+    @Column(length = 100)
+    private String password;
+
+    @Column(length = 100)
+    private String email;
+
+    // ==========================================
+    // [추가] 권한 목록 (1:N 관계)
+    // ==========================================
+    // mappedBy = "user": UserRole 클래스의 'user' 필드가 관계의 주인이라는 뜻
+    // cascade = CascadeType.ALL: 유저를 저장/삭제하면 권한도 같이 저장/삭제
+    // orphanRemoval = true: 리스트에서 권한을 제거하면 DB에서도 삭제됨
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRole> roles = new ArrayList<>();
+
+    /**
+     * 권한 추가 메서드
+     * @param roleType
+     */
+    public void AddRole(RoleType roleType){
+        UserRole userRole = UserRole.builder()
+                .user(this)
+                .role(roleType)
+                .build();
+
+        this.roles.add(userRole);
+    }
+
+}
