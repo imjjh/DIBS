@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.imjjh'
 version = '0.0.1-SNAPSHOT'
-description = 'TicketLock'
+description = 'Dibs'
 
 java {
 	toolchain {
@@ -24,6 +24,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 //	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Redis & Cache
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 	// mysql
 	runtimeOnly 'com.mysql:mysql-connector-j'
