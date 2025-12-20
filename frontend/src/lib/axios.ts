@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
+    baseURL: '/api',
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ api.interceptors.response.use(
                 // Refresh Token으로 재발급 시도
                 // (주의: api.post 대신 axios.post 사용 추천 - 인터셉터 무한 루프 방지)
                 await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'}/auth/refresh`,
+                    '/api/auth/refresh',
                     {},
                     { withCredentials: true } // 쿠키(refresh token) 전송 필수
                 );

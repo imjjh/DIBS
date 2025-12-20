@@ -7,19 +7,22 @@ export interface User {
     id: number;
     email: string;
     name: string;
+    nickName?: string;
+    points: number;
     roles: string[];
 }
 
 export interface LoginCredentials {
-    email: string;
-    password: string;
+    username?: string; // Standard login uses username
+    email?: string;
+    password?: string;
 }
 
 export interface SignupCredentials {
+    username: string;
+    password?: string;
     email: string;
-    password: string;
-    name: string;
-    role?: 'CUSTOMER' | 'ADMIN';
+    nickName?: string;
 }
 
 export interface AuthResponse {
@@ -28,60 +31,94 @@ export interface AuthResponse {
     user: User;
 }
 
-export interface Movie {
-    id: number;
-    title: string;
-    posterUrl: string;
-    backdropUrl?: string;
-    rating: number;
-    genre: string;
-    duration: number;
-    description: string;
-    director?: string;
-    cast?: string[];
-    releaseDate: string;
-}
-
-export interface Seat {
-    id: string;
-    row: string;
-    col: number;
-    status: 'available' | 'reserved' | 'selected' | 'locked';
-    price: number;
-}
-
-export interface Booking {
-    id: string;
-    movie: Partial<Movie>;
-    date: string;
-    time: string;
-    seats: string[];
-    totalPrice: number;
-    status: 'CONFIRMED' | 'CANCELLED';
-    createdAt: string;
+export enum ProductStatus {
+    ON_SALE = 'ON_SALE',
+    RESERVED = 'RESERVED',
+    SOLD_OUT = 'SOLD_OUT',
+    HIDDEN = 'HIDDEN'
 }
 
 export interface Product {
     id: number;
     name: string;
-    price: number;
-    imageUrl: string;
-    category: 'SNACK' | 'DRINK' | 'COMBO';
     description: string;
+    price: number;
+    stockQuantity: number;
+    status: ProductStatus;
+    imageUrl?: string;
+    sellerId?: number;
 }
 
-export interface CartItem extends Product {
-    quantity: number;
+export interface Event {
+    id: number;
+    title: string;
+    productId: number;
+    eventPrice: number;
+    limitQuantity: number;
+    remainingQuantity: number;
+    startAt: string;
+    endAt: string;
+}
+
+export enum CouponType {
+    FIXED_AMOUNT = 'FIXED_AMOUNT',
+    PERCENTAGE = 'PERCENTAGE'
 }
 
 export interface Coupon {
     id: number;
-    code: string;
     name: string;
-    discountAmount: number;
-    discountType: 'PERCENT' | 'FIXED';
-    validUntil: string;
-    description: string;
+    type: CouponType;
+    discountValue: number;
+    minOrderPrice: number;
     totalQuantity: number;
     remainingQuantity: number;
+    validFrom: string;
+    validTo: string;
+}
+
+export interface UserCoupon {
+    id: number;
+    userId: number;
+    couponId: number;
+    isUsed: boolean;
+    usedAt?: string;
+    coupon: Coupon; // Included for convenience
+}
+
+export enum OrderStatus {
+    PAYMENT_COMPLETED = 'PAYMENT_COMPLETED',
+    SHIPPING = 'SHIPPING',
+    DELIVERED = 'DELIVERED',
+    CANCELLED = 'CANCELLED'
+}
+
+export interface Order {
+    id: number;
+    buyerId: number;
+    totalPrice: number;
+    discountPrice: number;
+    usedPoints: number;
+    earnPoints: number;
+    finalPrice: number;
+    status: OrderStatus;
+    deliveryAt?: string;
+    orderItems: OrderItem[];
+}
+
+export interface OrderItem {
+    id: number;
+    orderId: number;
+    productId: number;
+    orderPrice: number;
+    count: number;
+    product?: Product; // Included for convenience
+}
+
+export interface CartItem {
+    id: number; // Cart ID or Product ID depending on implementation
+    productId: number;
+    userId: number;
+    count: number;
+    product: Product;
 }
