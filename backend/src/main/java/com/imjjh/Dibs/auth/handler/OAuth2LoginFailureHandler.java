@@ -1,6 +1,6 @@
 package com.imjjh.Dibs.auth.handler;
 
-import com.imjjh.Dibs.common.dto.ErrorResponse;
+import com.imjjh.Dibs.common.dto.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,15 +31,9 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setContentType("application/json;charset=UTF-8");
 
-        String errorCode = "AUTH_FAILED"; // TODO: 필요시 구체화 (OAuth2, 기본 로그인 등 구분)
+        ApiResponse<Void> apiResponse = ApiResponse.of("소셜 로그인에 실패했습니다: " + exception.getMessage(), null);
 
-        ErrorResponse errorResponse = ErrorResponse.of(
-                errorCode,                  // error 필드
-                exception.getMessage(),     // message 필드
-                request.getRequestURI()     // path 필드
-        );
-
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
 
     }
 

@@ -26,10 +26,16 @@ export const useAuthStore = create<AuthState>()(
                 set({ isLoading: true, error: null });
                 try {
                     const response = await authService.login(credentials);
-                    // 토큰은 쿠키로 설정되므로 로컬스토리지 저장 불필요
                     set({ user: response.user, isAuthenticated: true, isLoading: false });
                 } catch (error: any) {
-                    set({ error: error.response?.data?.message || 'Login failed', isLoading: false });
+                    let errorMessage = '로그인에 실패했습니다.';
+                    if (error.response) {
+                        // 백엔드에서 보낸 ApiResponse의 message 사용
+                        errorMessage = error.response.data?.message || errorMessage;
+                    } else if (error.request) {
+                        errorMessage = '서버와 연결할 수 없습니다. 서버 상태를 확인해주세요.';
+                    }
+                    set({ error: errorMessage, isLoading: false });
                     throw error;
                 }
             },
@@ -37,12 +43,16 @@ export const useAuthStore = create<AuthState>()(
             signup: async (credentials) => {
                 set({ isLoading: true, error: null });
                 try {
-                    const response = await authService.signup(credentials);
-                    // 토큰은 쿠키로 설정되므로 로컬스토리지 저장 불필요
-                    const user = await authService.getMe();
-                    set({ user, isAuthenticated: true, isLoading: false });
+                    await authService.signup(credentials);
+                    set({ isLoading: false });
                 } catch (error: any) {
-                    set({ error: error.response?.data?.message || 'Signup failed', isLoading: false });
+                    let errorMessage = '회원가입에 실패했습니다.';
+                    if (error.response) {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    } else if (error.request) {
+                        errorMessage = '서버와 연결할 수 없습니다. 서버 상태를 확인해주세요.';
+                    }
+                    set({ error: errorMessage, isLoading: false });
                     throw error;
                 }
             },

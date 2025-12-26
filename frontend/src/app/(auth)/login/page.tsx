@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, Mail, Lock, MoveRight } from 'lucide-react';
+import { MessageCircle, Mail, Lock, MoveRight, Loader2, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginPage() {
+    const [credentials, setCredentials] = useState({
+        username: '', // 백엔드 DTO가 username을 받으므로 아이디 또는 이메일로 활용
+        password: ''
+    });
 
-    const { isAuthenticated } = useAuthStore();
+    const { login, isLoading, error, isAuthenticated } = useAuthStore();
     const router = useRouter();
 
     useEffect(() => {
@@ -16,6 +20,16 @@ export default function LoginPage() {
             router.push('/');
         }
     }, [isAuthenticated, router]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await login(credentials);
+            router.push('/');
+        } catch (err) {
+            console.error("Login failed", err);
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
@@ -35,14 +49,24 @@ export default function LoginPage() {
                     </p>
                 </div>
 
+                {error && (
+                    <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-center gap-3 text-destructive text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                        <AlertCircle className="h-4 w-4" />
+                        {error}
+                    </div>
+                )}
+
                 {/* Basic Login Form */}
-                <form className="space-y-4 mb-8" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4 mb-8" onSubmit={handleSubmit}>
                     <div className="space-y-3">
                         <div className="group relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <input
-                                type="email"
-                                placeholder="이메일 주소"
+                                type="text"
+                                placeholder="아이디"
+                                required
+                                value={credentials.username}
+                                onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                                 className="w-full pl-12 pr-4 py-4 bg-secondary/30 border border-transparent focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm"
                             />
                         </div>
@@ -51,17 +75,23 @@ export default function LoginPage() {
                             <input
                                 type="password"
                                 placeholder="비밀번호"
+                                required
+                                value={credentials.password}
+                                onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                                 className="w-full pl-12 pr-4 py-4 bg-secondary/30 border border-transparent focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm"
                             />
                         </div>
                     </div>
 
                     <div className="flex justify-end pr-1">
-                        <button className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors">비밀번호를 잊으셨나요?</button>
+                        <button type="button" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors">비밀번호를 잊으셨나요?</button>
                     </div>
 
-                    <button className="w-full py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98]">
-                        로그인
+                    <button
+                        disabled={isLoading}
+                        className="w-full py-4 bg-primary text-primary-foreground font-black rounded-2xl hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70"
+                    >
+                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : '로그인'}
                     </button>
                 </form>
 

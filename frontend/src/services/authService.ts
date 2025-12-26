@@ -3,13 +3,13 @@ import { LoginCredentials, SignupCredentials, User, AuthResponse, ApiResponse } 
 
 export const authService = {
     login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-        const response = await api.post<AuthResponse>('/auth/login', credentials);
-        return response.data;
+        const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', credentials);
+        return response.data.data;
     },
 
     signup: async (credentials: SignupCredentials): Promise<AuthResponse> => {
-        const response = await api.post<AuthResponse>('/auth/signup', credentials);
-        return response.data;
+        const response = await api.post<ApiResponse<AuthResponse>>('/auth/register', credentials);
+        return response.data.data;
     },
 
     getMe: async (): Promise<User> => {
@@ -18,6 +18,6 @@ export const authService = {
     },
 
     logout: async (): Promise<void> => {
-        await api.post('/auth/logout');
+        await api.post<ApiResponse<void>>('/auth/logout');
     },
 };

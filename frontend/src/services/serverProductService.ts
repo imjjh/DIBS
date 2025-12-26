@@ -1,6 +1,6 @@
 "use server";
 
-import { Product } from '@/types';
+import { Product, ApiResponse } from '@/types';
 
 /**
  * Server-only service for data fetching in Server Components.
@@ -22,7 +22,8 @@ export async function getProductsServer(): Promise<Product[]> {
             return [];
         }
 
-        return res.json();
+        const response = await res.json();
+        return response.data;
     } catch (error) {
         console.error('Server fetch error:', error);
         return [];
@@ -36,7 +37,8 @@ export async function getProductByIdServer(id: string): Promise<Product | null> 
         });
 
         if (!res.ok) return null;
-        return res.json();
+        const response = await res.json();
+        return response.data;
     } catch (error) {
         console.error('Server fetch error:', error);
         return null;

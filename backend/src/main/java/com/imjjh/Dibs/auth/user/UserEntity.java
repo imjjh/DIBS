@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class UserEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length=100)
+    @Column(length = 100)
     private String provider; // kakao, naver
 
     @Column(length = 100, unique = true)
@@ -34,7 +35,8 @@ public class UserEntity extends BaseTimeEntity {
     @Column(length = 100)
     private String username;
 
-    @Column(length = 100)
+    @Setter
+    @Column(length = 100, nullable = true)
     private String password;
 
     @Column(length = 100)
@@ -51,9 +53,10 @@ public class UserEntity extends BaseTimeEntity {
 
     /**
      * 권한 추가 메서드
+     * 
      * @param roleType
      */
-    public void addRole(RoleType roleType){
+    public void addRole(RoleType roleType) {
         UserRole userRole = UserRole.builder()
                 .user(this)
                 .role(roleType)
@@ -62,13 +65,40 @@ public class UserEntity extends BaseTimeEntity {
         this.roles.add(userRole);
     }
 
-
-    @Builder
+    /**
+     * OAuth2 회원가입
+     * 
+     * @param provider
+     * @param providerId
+     * @param nickName
+     * @param username
+     * @param email
+     */
+    @Builder(builderMethodName = "socialBuilder")
     public UserEntity(String provider, String providerId, String nickName, String username, String email) {
         this.provider = provider;
         this.providerId = providerId;
         this.nickName = nickName;
         this.username = username;
         this.email = email;
+        this.password = null;
+    }
+
+    /**
+     * 일반 회원가입
+     * 
+     * @param nickName
+     * @param username
+     * @param email
+     * @param password
+     */
+    @Builder
+    public UserEntity(String nickName, String username, String email, String password) {
+        this.provider = null;
+        this.providerId = null;
+        this.nickName = nickName;
+        this.username = username;
+        this.email = email;
+        this.password = password;
     }
 }

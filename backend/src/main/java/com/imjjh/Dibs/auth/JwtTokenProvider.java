@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Date;
 
@@ -24,8 +25,8 @@ public class JwtTokenProvider {
     private final long refreshTokenValidityInMilliseconds;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long tokenValidityInMilliseconds,
-               @Value("${jwt.refresh-expiration}") long refreshTokenValidityInMilliseconds,
+                            @Value("${jwt.expiration}") long tokenValidityInMilliseconds,
+                            @Value("${jwt.refresh-expiration}") long refreshTokenValidityInMilliseconds,
                             UserRepository userRepository) {
 
         // Hex 문자열을 byte 배열로 변환 // openssl rand -base64 32로 생성된 문자열 (jwt.secret)
@@ -37,12 +38,12 @@ public class JwtTokenProvider {
     }
 
     /**
-     * JWT 토큰을 생성합니다.
+     * JWT(AccessToken) 토큰을 생성합니다.
      *
      * @param authentication 인증 정보를 가지고있는 객체
      * @return (String) jwt
      */
-    public String createToken(Authentication authentication) {
+    public String createAccessToken(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String userId = userDetails.getName();
 
@@ -70,13 +71,13 @@ public class JwtTokenProvider {
         String userId = userDetails.getName();
 
         long now = (new Date()).getTime();
-        Date validty = new Date(now+this.refreshTokenValidityInMilliseconds);
+        Date validty = new Date(now + this.refreshTokenValidityInMilliseconds);
 
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date(now))
                 .setExpiration(validty)
-                .signWith(key,SignatureAlgorithm.HS256)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -103,7 +104,7 @@ public class JwtTokenProvider {
 
     /**
      * 토큰 유효성 검사
-     * 
+     *
      * @param token
      * @return
      */
@@ -125,7 +126,7 @@ public class JwtTokenProvider {
 
     /**
      * jws을 파싱하여 정보를 claims를 반환하는 함수
-     * 
+     *
      * @param accessToken
      * @return Claims (sub, iat, exp, exp, role ...)
      */

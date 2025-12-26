@@ -34,7 +34,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         log.info("OAuth2 login 성공! 토큰 생성 시작");
 
         // 토큰 생성
-        String accessToken = jwtTokenProvider.createToken(authentication);
+        String accessToken = jwtTokenProvider.createAccessToken(authentication);
         String refreshToken = jwtTokenProvider.createRefreshToken(authentication);
 
         // 인증정보에서 userId 꺼내기

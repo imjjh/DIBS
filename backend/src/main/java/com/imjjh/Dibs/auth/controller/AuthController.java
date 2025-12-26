@@ -2,6 +2,10 @@ package com.imjjh.Dibs.auth.controller;
 
 import com.imjjh.Dibs.auth.JwtTokenProvider;
 import com.imjjh.Dibs.auth.dto.CurrentUserResponseDto;
+import com.imjjh.Dibs.auth.dto.LoginRequestDto;
+import com.imjjh.Dibs.auth.dto.LoginResponseDto;
+import com.imjjh.Dibs.auth.dto.RegisterRequestDto;
+import com.imjjh.Dibs.auth.service.AuthService;
 import com.imjjh.Dibs.auth.token.RefreshToken;
 import com.imjjh.Dibs.auth.token.repository.RefreshTokenRepository;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
@@ -9,43 +13,71 @@ import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.dto.ApiResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AuthService authService;
 
-    public AuthController(JwtTokenProvider jwtTokenProvider, RefreshTokenRepository refreshTokenRepository) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.refreshTokenRepository = refreshTokenRepository;
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequestDto requestDto) {
+        authService.register(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of("회원가입 성공", null));
     }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<CurrentUserResponseDto>> login(@Valid @RequestBody LoginRequestDto requestDto) {
+         LoginResponseDto responseDto = authService.login(requestDto);
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", responseDto.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", responseDto.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(ApiResponse.of("로그인 성공",CurrentUserResponseDto.of(responseDto.user())));
+    }
+
 
     /**
      * 로그인 상태를 확인하고 로그인된 상태라면 유저 정보를 반환합니다.
-     * 
+     *
      * @param userDetails
      * @return 로그인 ? 유저 정보 : null
      */
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<?>> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ApiResponse<CurrentUserResponseDto>> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // 비로그인 상태에서도 "/me" 호출 가능
         if (userDetails == null) {
@@ -67,7 +99,7 @@ public class AuthController {
      * @return
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<ApiResponse<Void>> logout() {
 
         ResponseCookie cookie = ResponseCookie.from("accessToken", "")
                 .path("/")
@@ -77,39 +109,38 @@ public class AuthController {
                 .httpOnly(true)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
+        return ResponseEntity.status(HttpStatus.OK).
+                header(HttpHeaders.SET_COOKIE, cookie.toString()).
+                body(ApiResponse.of("로그아웃 성공", null));
     }
 
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
-        // refreshToken 추출 & 유효성 검사
-        String refreshToken = getAllCookies(request).get("refreshToken");
+    public ResponseEntity<ApiResponse<Void>> refresh(
+            @CookieValue(name="refreshToken", required = false) String refreshToken) {
 
         if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 없습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.of("Refresh Token이 없습니다.", null));
         }
 
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 Refresh Token입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.of("유효하지 않은 Refresh Token입니다.", null));
         }
 
         // Redis에 저장된 토큰인지 확인
-        Authentication auth  =  jwtTokenProvider.getAuthentication(refreshToken);
+        Authentication auth = jwtTokenProvider.getAuthentication(refreshToken);
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         String userId = userDetails.getName();
 
         // Redis에서 userId로 조회
         RefreshToken redisToken = refreshTokenRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Redis에 토큰이 없습니다. (만료됨)"));
+                .orElse(null);
 
-        if (!redisToken.getToken().equals(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰 정보가 일치하지 않습니다.");
+        if (redisToken == null || !redisToken.getToken().equals(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.of("토큰이 만료되었거나 일치하지 않습니다.", null));
         }
 
-        String newAccessToken = jwtTokenProvider.createToken(auth);
+        String newAccessToken = jwtTokenProvider.createAccessToken(auth);
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
                 .httpOnly(true)
@@ -119,18 +150,18 @@ public class AuthController {
                 .sameSite("Lax")
                 .build();
 
-        response.addHeader("Set-Cookie",accessCookie.toString());
-
-        return ResponseEntity.ok("Access Token 재발급 성공");
-
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE,accessCookie.toString())
+                .body(ApiResponse.of("Access Token 재발급 성공", null));
     }
 
     /**
      * 쿠키 배열을 Map으로 변환하는 헬퍼 메서드
+     *
      * @param request
      * @return
      */
-    private Map<String,String> getAllCookies(HttpServletRequest request) {
+    private Map<String, String> getAllCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
