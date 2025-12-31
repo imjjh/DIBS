@@ -84,7 +84,14 @@ export default function LoginPage() {
                     </div>
 
                     <div className="flex justify-end pr-1">
-                        <button type="button" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors">비밀번호를 잊으셨나요?</button>
+                        <button
+                            type="button"
+                            disabled
+                            title="준비 중인 기능입니다."
+                            className="text-xs font-bold text-muted-foreground/50 cursor-not-allowed"
+                        >
+                            비밀번호를 잊으셨나요? (준비 중)
+                        </button>
                     </div>
 
                     <button

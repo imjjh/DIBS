@@ -12,8 +12,6 @@ import com.imjjh.Dibs.auth.token.repository.RefreshTokenRepository;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.dto.ApiResponse;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,10 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -158,26 +152,5 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK)
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .body(ApiResponse.of("Access Token 재발급 성공", null));
-    }
-
-    /**
-     * 쿠키 배열을 Map으로 변환하는 헬퍼 메서드
-     *
-     * @param request
-     * @return
-     */
-    private Map<String, String> getAllCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies == null) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> cookieMap = new HashMap<>();
-        for (Cookie cookie : cookies) {
-            cookieMap.put(cookie.getName(), cookie.getValue());
-        }
-
-        return cookieMap;
     }
 }

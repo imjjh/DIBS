@@ -24,4 +24,8 @@ export const authService = {
     validUsername: async (username: string): Promise<void> => {
         await api.post<ApiResponse<void>>('/auth/validUsername', { username });
     },
+
+    forgotPassword: async (email: string): Promise<void> => {
+        await api.post<ApiResponse<void>>('/auth/forgot-password', { email });
+    },
 };
