@@ -4,6 +4,7 @@ import com.imjjh.Dibs.auth.JwtTokenProvider;
 import com.imjjh.Dibs.auth.handler.OAuth2LoginFailureHandler;
 import com.imjjh.Dibs.auth.handler.OAuth2LoginSuccessHandler;
 import com.imjjh.Dibs.auth.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,41 +33,46 @@ public class SecurityConfig {
         private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
         @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService)
-                        throws Exception {
+        public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
                 http
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .csrf(csrf-> csrf
-                                        .csrfTokenRepository(cookieCsrfTokenRepository())
-                                        .ignoringRequestMatchers("/oauth2/**", "/login/**", "/api/auth/**" ) // 인증 없이 접근 가능한 경로 CSRF 검사 제외 (로그인 전 등)
-                                )
-                                .httpBasic(AbstractHttpConfigurer::disable)
-                                .formLogin(AbstractHttpConfigurer::disable)
+                        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                        .csrf(csrf-> csrf
+                                .csrfTokenRepository(cookieCsrfTokenRepository())
+                                .ignoringRequestMatchers("/oauth2/**", "/login/**", "/api/auth/**" ) // 인증 없이 접근 가능한 경로 CSRF 검사 제외 (로그인 전 등)
+                        )
+                        .httpBasic(AbstractHttpConfigurer::disable)
+                        .formLogin(AbstractHttpConfigurer::disable)
 
-                                // 스프링 시큐리티는 기본적으로 세션을 사용
-                                // JWT 사용시 세션을 아예 생성하지 않도록 (Stateless) 설정
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        // 스프링 시큐리티는 기본적으로 세션을 사용
+                        // JWT 사용시 세션을 아예 생성하지 않도록 (Stateless) 설정
+                        .sessionManagement(session -> session
+                                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                                .authorizeHttpRequests(auth -> auth
-                                                // 로그인 이전 허용 페이지
-                                                // 소셜 로그인 관련 URL과 로그인 페이지
-                                                .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll()
-                                                // 그외 모든 요청은 인증된 사용자만 접근 가능
-                                                .anyRequest().authenticated())
+                        .authorizeHttpRequests(auth -> auth
+                                        // 로그인 이전 허용 페이지
+                                        // 소셜 로그인 관련 URL과 로그인 페이지
+                                        .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll()
+                                        // 그외 모든 요청은 인증된 사용자만 접근 가능
+                                        .anyRequest().authenticated())
 
-                                .oauth2Login(oauth2 -> oauth2
-                                                .userInfoEndpoint(userInfo -> userInfo
-                                                                .userService(customOAuth2UserService))
-                                                .successHandler(oAuth2LoginSuccessHandler)
-                                                .failureHandler(oAuth2LoginFailureHandler))
+                        .oauth2Login(oauth2 -> oauth2
+                                        .userInfoEndpoint(userInfo -> userInfo
+                                                        .userService(customOAuth2UserService))
+                                        .successHandler(oAuth2LoginSuccessHandler)
+                                        .failureHandler(oAuth2LoginFailureHandler))
+
+                        .exceptionHandling(exceptionHandling-> exceptionHandling.authenticationEntryPoint(((request, response, authException) -> {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.getWriter().write("{\\\"status\\\":401,\\\"message\\\":\\\"Unauthorized\\\"}");
+                        })))
 
                         .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class) // csrf 필터는 jwt 앞이든 뒤든 크게 상관없음?
 
-                                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                                                UsernamePasswordAuthenticationFilter.class);
+                        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                                        UsernamePasswordAuthenticationFilter.class);
 
-                return http.build();
+        return http.build();
         }
 
         @Bean

@@ -36,12 +36,21 @@ api.interceptors.request.use(
 
 // Response interceptor: Handle 401 & Refresh Token
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log(`[API Response] ${response.config.url}:`, response.status);
+        return response;
+    },
     async (error) => {
         const originalRequest = error.config;
 
         // 401 에러이고, 아직 재시도하지 않은 요청일 경우
         if (error.response?.status === 401 && !originalRequest._retry) {
+            // 로그인, 회원가입 관련 API는 토큰 갱신을 하지 않음 (세션이 없는게 당연하므로)
+            if (originalRequest.url?.includes('/auth/login') ||
+                originalRequest.url?.includes('/auth/register') ||
+                originalRequest.url?.includes('/auth/validUsername')) {
+                return Promise.reject(error);
+            }
             originalRequest._retry = true;
 
             try {

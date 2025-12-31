@@ -91,7 +91,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             log.info("새로운 소셜 로그인 유저 가입: {}", username);
 
-            UserEntity newUser = UserEntity.builder()
+            UserEntity newUser = UserEntity.socialBuilder()
                     .username(username) // 내부용 ID (springSecurity 필수)
                     .nickName(nickname) // 화면 표시용 (kakao Nickname)
                     .email(email)

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, CheckCircle, MoveLeft, Ticket, AlertCircle, Key } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { authService } from '@/services/authService';
 
 export default function SignupPage() {
     const router = useRouter();
@@ -17,11 +18,43 @@ export default function SignupPage() {
         confirmPassword: ''
     });
     const [localError, setLocalError] = useState<string | null>(null);
+    const [usernameStatus, setUsernameStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [usernameMessage, setUsernameMessage] = useState('');
+
+    const USERNAME_REGEX = /^[a-zA-Z0-9]{4,20}$/;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         setLocalError(null);
+        if (name === 'username') {
+            setUsernameStatus('idle');
+            setUsernameMessage('');
+        }
+    };
+
+    const handleUsernameCheck = async () => {
+        if (!formData.username) {
+            setUsernameStatus('error');
+            setUsernameMessage('아이디를 입력해주세요.');
+            return;
+        }
+
+        if (!USERNAME_REGEX.test(formData.username)) {
+            setUsernameStatus('error');
+            setUsernameMessage('아이디는 4~20자의 영문 대소문자와 숫자만 사용 가능합니다.');
+            return;
+        }
+
+        setUsernameStatus('loading');
+        try {
+            await authService.validUsername(formData.username);
+            setUsernameStatus('success');
+            setUsernameMessage('사용 가능한 아이디입니다.');
+        } catch (err: any) {
+            setUsernameStatus('error');
+            setUsernameMessage(err.response?.data?.message || '이미 사용 중인 아이디입니다.');
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -30,6 +63,11 @@ export default function SignupPage() {
 
         if (formData.password !== formData.confirmPassword) {
             setLocalError('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        if (usernameStatus !== 'success') {
+            setLocalError('아이디 중복 확인을 해주세요.');
             return;
         }
 
@@ -101,17 +139,34 @@ export default function SignupPage() {
                                 className="w-full pl-12 pr-4 py-4 bg-secondary/30 border border-transparent focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm"
                             />
                         </div>
-                        <div className="group relative">
-                            <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            <input
-                                type="text"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                placeholder="아이디"
-                                required
-                                className="w-full pl-12 pr-4 py-4 bg-secondary/30 border border-transparent focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm"
-                            />
+                        <div className="space-y-2">
+                            <div className="group relative flex gap-2">
+                                <div className="relative flex-1">
+                                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        placeholder="아이디"
+                                        required
+                                        className={`w-full pl-12 pr-4 py-4 bg-secondary/30 border ${usernameStatus === 'success' ? 'border-primary/50' : usernameStatus === 'error' ? 'border-destructive/50' : 'border-transparent'} focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm`}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleUsernameCheck}
+                                    disabled={usernameStatus === 'loading' || usernameStatus === 'success'}
+                                    className="px-4 py-4 bg-secondary/50 hover:bg-secondary text-foreground text-xs font-bold rounded-2xl transition-all disabled:opacity-50 whitespace-nowrap"
+                                >
+                                    {usernameStatus === 'loading' ? '확인 중...' : '중복 확인'}
+                                </button>
+                            </div>
+                            {usernameMessage && (
+                                <p className={`text-[10px] font-bold px-2 ${usernameStatus === 'success' ? 'text-primary' : 'text-destructive'}`}>
+                                    {usernameMessage}
+                                </p>
+                            )}
                         </div>
                         <div className="group relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />

@@ -4,10 +4,12 @@ import com.imjjh.Dibs.auth.JwtTokenProvider;
 import com.imjjh.Dibs.auth.dto.LoginRequestDto;
 import com.imjjh.Dibs.auth.dto.LoginResponseDto;
 import com.imjjh.Dibs.auth.dto.RegisterRequestDto;
+import com.imjjh.Dibs.auth.dto.ValidUsernameRequestDto;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
+import com.imjjh.Dibs.common.exception.DuplicateLoginIdException;
 import com.imjjh.Dibs.common.exception.InvalidInputException;
 import com.imjjh.Dibs.common.exception.UserNotFoundException;
 import jakarta.validation.Valid;
@@ -18,6 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -26,10 +30,22 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     /**
+     * 사용 중인 ID 확인
+     * @param username
+     */
+    public void validUsername(String username) {
+        Optional<UserEntity> optionalUserEntity = userRepository.findByUsername(username);
+        if (optionalUserEntity.isPresent()) {
+            throw new DuplicateLoginIdException("중복된 아이디 입니다.");
+        }
+    }
+
+
+    /**
      * 회원가입
      * @param requestDto
      */
-    public void register(@Valid RegisterRequestDto requestDto) {
+    public void register(RegisterRequestDto requestDto) {
 
         UserEntity entity = RegisterRequestDto.toEntity(requestDto);
 
@@ -49,7 +65,7 @@ public class AuthService {
      * @param requestDto
      * @return
      */
-    public LoginResponseDto login(@Valid LoginRequestDto requestDto) {
+    public LoginResponseDto login(LoginRequestDto requestDto) {
         UserEntity userEntity = userRepository.findByUsername(requestDto.username())
                 .orElseThrow(() -> new UserNotFoundException("잘못된 아이디 또는 비밀번호 입니다."));
 

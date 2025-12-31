@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, Mail, Lock, MoveRight, Loader2, AlertCircle } from 'lucide-react';
+import { MessageCircle, Key, Lock, MoveRight, Loader2, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginPage() {
@@ -60,7 +60,7 @@ export default function LoginPage() {
                 <form className="space-y-4 mb-8" onSubmit={handleSubmit}>
                     <div className="space-y-3">
                         <div className="group relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <input
                                 type="text"
                                 placeholder="아이디"

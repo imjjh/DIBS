@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
                 ApiResponse.of(message, null));
     }
 
+    @ExceptionHandler(DuplicateLoginIdException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateLoginIdException(DuplicateLoginIdException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                ApiResponse.of(e.getMessage(), null));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllException(Exception e) {
         log.error("정의되지 않은 에러 발생: e");
