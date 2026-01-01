@@ -34,8 +34,7 @@ export interface AuthResponse {
 export enum ProductStatus {
     ON_SALE = 'ON_SALE',
     RESERVED = 'RESERVED',
-    SOLD_OUT = 'SOLD_OUT',
-    HIDDEN = 'HIDDEN'
+    SOLD_OUT = 'SOLD_OUT'
 }
 
 export interface Product {
@@ -46,6 +45,9 @@ export interface Product {
     stockQuantity: number;
     status: ProductStatus;
     imageUrl?: string;
+    category?: string;
+    specialPrice?: number;
+    discountRate?: number;
     sellerId?: number;
 }
 

@@ -17,52 +17,63 @@ import {
     ShoppingBag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ProductStatus } from '@/types';
+import { Product, ProductStatus } from '@/types';
+import { productService } from '@/services/productService';
 
 // Mock Categories
 const CATEGORIES = ["전체", "신발", "의류", "액세서리", "디지털", "한정판"];
 
 // Mock Store Products
-const MOCK_STORE_PRODUCTS = [
+const MOCK_STORE_PRODUCTS: Product[] = [
     {
         id: 1,
         name: "울트라 하이 퍼포먼스 스니커즈",
+        description: "최고의 착화감을 자랑하는 퍼포먼스 슈즈",
         price: 129000,
+        stockQuantity: 50,
         status: ProductStatus.ON_SALE,
         category: "신발",
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop",
-        discount: 20
+        imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop",
+        discountRate: 20
     },
     {
         id: 2,
         name: "프리미엄 노이즈 캔슬링 헤드셋",
+        description: "고음질 사운드와 완벽한 소음 차단",
         price: 349000,
+        stockQuantity: 30,
         status: ProductStatus.ON_SALE,
         category: "디지털",
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop",
-        discount: 15
+        imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop",
+        discountRate: 15
     },
     {
         id: 3,
         name: "미니멀리스트 가죽 백팩",
+        description: "심플하고 고급스러운 가죽 소재의 백팩",
         price: 89000,
+        stockQuantity: 0,
         status: ProductStatus.SOLD_OUT,
         category: "액세서리",
-        image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=2069&auto=format&fit=crop",
-        discount: 0
+        imageUrl: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=2069&auto=format&fit=crop",
+        discountRate: 0
     },
     {
         id: 4,
         name: "오버사이즈 헤비 코튼 후드",
+        description: "데일리로 입기 좋은 편안한 핏의 후드",
         price: 59000,
+        stockQuantity: 100,
         status: ProductStatus.ON_SALE,
         category: "의류",
-        image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1974&auto=format&fit=crop",
-        discount: 10
+        imageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1974&auto=format&fit=crop",
+        discountRate: 10
     }
 ];
 
 export default function StorePage() {
+    const [products, setProducts] = useState<Product[]>(MOCK_STORE_PRODUCTS);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -70,7 +81,22 @@ export default function StorePage() {
 
     useEffect(() => {
         setMounted(true);
+        loadProducts();
     }, []);
+
+    const loadProducts = async () => {
+        try {
+            setIsLoading(true);
+            const data = await productService.getProducts();
+            if (data && data.length > 0) {
+                setProducts(data);
+            }
+        } catch (error) {
+            console.error("Failed to load products, using mock data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     if (!mounted) return null;
 
@@ -183,7 +209,7 @@ export default function StorePage() {
                             "grid gap-8",
                             viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
                         )}>
-                            {MOCK_STORE_PRODUCTS.map((product) => (
+                            {(isLoading ? MOCK_STORE_PRODUCTS : products).map((product) => (
                                 <Link
                                     href={`/store/${product.id}`}
                                     key={product.id}
@@ -192,16 +218,16 @@ export default function StorePage() {
                                     {/* Product Image */}
                                     <div className="relative aspect-[4/5] bg-muted overflow-hidden">
                                         <img
-                                            src={product.image}
+                                            src={product.imageUrl}
                                             alt={product.name}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
 
                                         {/* Status Overlays */}
                                         <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                            {product.discount > 0 && (
+                                            {product.discountRate !== undefined && product.discountRate > 0 && (
                                                 <div className="px-3 py-1 bg-red-600 text-white text-[10px] font-black rounded-lg tracking-widest flex items-center gap-1 shadow-lg">
-                                                    <Zap className="w-3 h-3" /> {product.discount}% OFF
+                                                    <Zap className="w-3 h-3" /> {product.discountRate}% OFF
                                                 </div>
                                             )}
                                             {product.status === ProductStatus.SOLD_OUT && (
@@ -228,9 +254,9 @@ export default function StorePage() {
                                         <h3 className="text-xl font-black tracking-tight leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
                                         <div className="flex items-baseline gap-2">
                                             <span className="text-2xl font-black">{product.price.toLocaleString()}원</span>
-                                            {product.discount > 0 && (
+                                            {product.discountRate !== undefined && product.discountRate > 0 && (
                                                 <span className="text-sm font-bold text-muted-foreground line-through opacity-50">
-                                                    {(product.price * (1 + product.discount / 100)).toLocaleString()}원
+                                                    {(product.price * (1 + product.discountRate / 100)).toLocaleString()}원
                                                 </span>
                                             )}
                                         </div>
