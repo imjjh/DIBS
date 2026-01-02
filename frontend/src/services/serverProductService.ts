@@ -10,7 +10,7 @@ const BACKEND_URL = process.env.BACKEND_API_URL || 'http://localhost:8080';
 
 export async function getProductsServer(): Promise<Product[]> {
     try {
-        const res = await fetch(`${BACKEND_URL}/api/products`, {
+        const res = await fetch(`${BACKEND_URL}/api/product`, {
             cache: 'no-store', // Disable caching for real-time like experience or use revalidate
             headers: {
                 'Content-Type': 'application/json',

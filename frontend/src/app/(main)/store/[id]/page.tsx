@@ -5,14 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { ShoppingBag, Plus, Minus, ArrowLeft, Star, Heart, Share2, ShieldCheck, Zap, Truck, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { productService } from '@/services/productService';
-import { Product, ProductStatus } from '@/types';
+import { Product, ProductStatus, ProductDetail } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const router = useRouter();
-    const [product, setProduct] = useState<Product | null>(null);
+    const [product, setProduct] = useState<ProductDetail | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'details' | 'info' | 'reviews'>('details');
@@ -21,11 +21,8 @@ export default function ProductDetailPage() {
         const fetchProduct = async () => {
             if (!id) return;
             try {
-                // In a real app, you would fetch by ID: productService.getProductById(Number(id))
-                // For now, we'll mock it or find in the list
-                const products = await productService.getProducts();
-                const found = products.find(p => p.id === Number(id));
-                setProduct(found || null);
+                const data = await productService.getProductById(Number(id));
+                setProduct(data);
             } catch (error) {
                 console.error("Failed to fetch product", error);
             } finally {
@@ -175,8 +172,9 @@ export default function ProductDetailPage() {
                                         </button>
                                         <span className="text-xl font-black w-10 text-center">{quantity}</span>
                                         <button
-                                            onClick={() => setQuantity(q => q + 1)}
-                                            className="p-2 hover:bg-background rounded-xl transition-all shadow-sm"
+                                            onClick={() => setQuantity(q => Math.min(product.stockQuantity || 1, q + 1))}
+                                            disabled={quantity >= (product.stockQuantity || 1)}
+                                            className="p-2 hover:bg-background disabled:opacity-30 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
                                         >
                                             <Plus className="w-5 h-5" />
                                         </button>

@@ -41,14 +41,17 @@ export interface Product {
     id: number;
     name: string;
     description?: string;
-    price: number | string;
+    price: number;
     stockQuantity?: number;
     status: ProductStatus;
     imageUrl?: string;
     category?: string;
-    specialPrice?: number;
     discountRate?: number;
     sellerId?: number;
+}
+
+export interface ProductDetail extends Product {
+    sellerName: string;
 }
 
 export interface ProductSearchParams {
