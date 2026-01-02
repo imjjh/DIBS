@@ -27,7 +27,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @Operation(summary = "특정 상품 상세 정보")
-    public ResponseEntity<ApiResponse<ProductDetailResponseDto>> getProduct(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProductDetailResponseDto>> getProduct(@PathVariable("id") Long id) {
         ProductDetailResponseDto responseDto= productService.getProduct(id);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("상품 상세 정보 조회 성공", responseDto));
     }

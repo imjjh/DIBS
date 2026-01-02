@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-
     /**
      * 유효성 검사 실패 메시지
+     * 
      * @param e
      * @return
      */
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllException(Exception e) {
-        log.error("정의되지 않은 에러 발생: e");
+        log.error("정의되지 않은 에러 발생: ", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.of("서버 내부 에러가 발생했습니다.", null));
     }
@@ -43,15 +43,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(UserNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.of(e.getMessage(),null));
+                ApiResponse.of(e.getMessage(), null));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.of(e.getMessage(),null));
+                ApiResponse.of(e.getMessage(), null));
     }
-
 
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidInputException(InvalidInputException e) {
