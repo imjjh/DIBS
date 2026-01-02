@@ -76,25 +76,72 @@ export default function StorePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [mounted, setMounted] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+    // Debounce search query
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
     useEffect(() => {
         setMounted(true);
         loadProducts();
-    }, []);
+    }, [selectedCategory, debouncedSearchQuery]);
 
     const loadProducts = async () => {
         try {
             setIsLoading(true);
-            const data = await productService.getProducts();
-            if (data && data.length > 0) {
-                setProducts(data);
+            const response = await productService.getProducts({
+                category: selectedCategory === "전체" ? undefined : selectedCategory,
+                keyword: debouncedSearchQuery || undefined,
+                page: 0,
+                size: 12
+            });
+
+            if (response && response.items) {
+                setProducts(response.items);
+                setHasMore(response.items.length >= 12);
             }
         } catch (error) {
-            console.error("Failed to load products, using mock data:", error);
+            console.error("Failed to load products:", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const loadMoreProducts = async () => {
+        if (!hasMore || isFetchingMore) return;
+
+        try {
+            setIsFetchingMore(true);
+            const lastProduct = products[products.length - 1];
+            const response = await productService.getProducts({
+                category: selectedCategory === "전체" ? undefined : selectedCategory,
+                keyword: debouncedSearchQuery || undefined,
+                lastProductId: lastProduct?.id,
+                page: Math.floor(products.length / 12),
+                size: 12
+            });
+
+            if (response && response.items) {
+                if (response.items.length === 0) {
+                    setHasMore(false);
+                } else {
+                    setProducts(prev => [...prev, ...response.items]);
+                    setHasMore(response.items.length >= 12);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load more products:", error);
+        } finally {
+            setIsFetchingMore(false);
         }
     };
 
@@ -256,7 +303,7 @@ export default function StorePage() {
                                             <span className="text-2xl font-black">{product.price.toLocaleString()}원</span>
                                             {product.discountRate !== undefined && product.discountRate > 0 && (
                                                 <span className="text-sm font-bold text-muted-foreground line-through opacity-50">
-                                                    {(product.price * (1 + product.discountRate / 100)).toLocaleString()}원
+                                                    {(Number(product.price) * (1 + product.discountRate / 100)).toLocaleString()}원
                                                 </span>
                                             )}
                                         </div>
@@ -276,13 +323,23 @@ export default function StorePage() {
                             ))}
                         </div>
 
-                        {/* Pagination Placeholder */}
-                        <div className="mt-20 flex justify-center">
-                            <button className="px-12 py-4 border border-border rounded-2xl font-black text-sm hover:bg-secondary transition-all flex items-center gap-3 group">
-                                <Plus className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-                                아이템 더 보기
-                            </button>
-                        </div>
+                        {/* Pagination / Load More */}
+                        {hasMore && (
+                            <div className="mt-20 flex justify-center">
+                                <button
+                                    onClick={loadMoreProducts}
+                                    disabled={isFetchingMore}
+                                    className="px-12 py-4 border border-border rounded-2xl font-black text-sm hover:bg-secondary transition-all flex items-center gap-3 group disabled:opacity-50"
+                                >
+                                    {isFetchingMore ? (
+                                        <Clock className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <Plus className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                    )}
+                                    {isFetchingMore ? "불러오는 중..." : "아이템 더 보기"}
+                                </button>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>

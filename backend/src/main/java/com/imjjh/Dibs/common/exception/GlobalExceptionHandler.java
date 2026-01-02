@@ -46,6 +46,12 @@ public class GlobalExceptionHandler {
                 ApiResponse.of(e.getMessage(),null));
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ApiResponse.of(e.getMessage(),null));
+    }
+
 
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidInputException(InvalidInputException e) {

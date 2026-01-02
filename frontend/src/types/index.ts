@@ -40,15 +40,31 @@ export enum ProductStatus {
 export interface Product {
     id: number;
     name: string;
-    description: string;
-    price: number;
-    stockQuantity: number;
+    description?: string;
+    price: number | string;
+    stockQuantity?: number;
     status: ProductStatus;
     imageUrl?: string;
     category?: string;
     specialPrice?: number;
     discountRate?: number;
     sellerId?: number;
+}
+
+export interface ProductSearchParams {
+    page?: number;
+    size?: number;
+    keyword?: string;
+    category?: string;
+    lastProductId?: number;
+}
+
+export interface ProductListResponse {
+    items: Product[];
+    totalElements: number;
+    page: number;
+    size: number;
+    totalPages: number;
 }
 
 export interface Event {
