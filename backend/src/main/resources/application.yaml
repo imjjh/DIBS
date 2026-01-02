@@ -40,7 +40,7 @@ spring:
             user-name-attribute: response  # 네이버는 response 안에 유저 정보가 있음
 
   datasource:
-    url: jdbc:mysql://localhost:3306/dibs?serverTimezone=UTC&useSSL=false
+    url: jdbc:mysql://localhost:3307/dibs?serverTimezone=UTC&useSSL=false
     username: your_user
     password: your_pass
     driver-class-name: com.mysql.cj.jdbc.Driver

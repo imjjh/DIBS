@@ -6,10 +6,10 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
 
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3307/dibs?serverTimezone=UTC&useSSL=false&createDatabaseIfNotExist=true
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
