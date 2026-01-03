@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
     children,
@@ -19,12 +18,8 @@ export default function AdminLayout({
     }, [checkAuth]);
 
     useEffect(() => {
-        if (!isLoading && (!isAuthenticated || user?.role !== 'ADMIN')) {
-            // Redirect to login if not admin
-            // For now, let's assume login page handles redirect back or we just go to home
-            // router.push('/login'); 
-            // Actually, if they are logged in but not admin, maybe go home?
-            if (isAuthenticated && user?.role !== 'ADMIN') {
+        if (!isLoading && (!isAuthenticated || !user?.roles?.includes('ROLE_ADMIN'))) {
+            if (isAuthenticated && !user?.roles?.includes('ROLE_ADMIN')) {
                 router.push('/');
             } else if (!isAuthenticated) {
                 router.push('/login');
@@ -36,7 +31,7 @@ export default function AdminLayout({
         return <div className="flex items-center justify-center h-screen">Loading...</div>;
     }
 
-    if (!isAuthenticated || user?.role !== 'ADMIN') {
+    if (!isAuthenticated || !user?.roles?.includes('ROLE_ADMIN')) {
         return null; // Will redirect
     }
 
@@ -48,20 +43,20 @@ export default function AdminLayout({
                     <h1 className="text-xl font-bold text-primary">TicketLock Admin</h1>
                 </div>
                 <nav className="p-4 space-y-2">
-                    <Link href="/admin/movies">
-                        <Button variant="ghost" className="w-full justify-start">
+                    <Link href="/admin/movies" className="block w-full">
+                        <button className="w-full text-left px-4 py-2 rounded-md hover:bg-secondary transition-all">
                             영화 관리
-                        </Button>
+                        </button>
                     </Link>
-                    <Link href="/admin/products">
-                        <Button variant="ghost" className="w-full justify-start">
+                    <Link href="/admin/products" className="block w-full">
+                        <button className="w-full text-left px-4 py-2 rounded-md hover:bg-secondary transition-all">
                             상품 관리
-                        </Button>
+                        </button>
                     </Link>
                     <div className="pt-4 mt-4 border-t border-border">
-                        <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-100/10" onClick={() => { logout(); router.push('/login'); }}>
+                        <button className="w-full text-left px-4 py-2 rounded-md text-red-500 hover:text-red-600 hover:bg-red-100/10 transition-all font-bold" onClick={() => { logout(); router.push('/login'); }}>
                             로그아웃
-                        </Button>
+                        </button>
                     </div>
                 </nav>
             </aside>

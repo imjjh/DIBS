@@ -3,21 +3,21 @@ import { Product, ApiResponse, ProductSearchParams, ProductListResponse, Product
 
 export const productService = {
     getProducts: async (params?: ProductSearchParams): Promise<ProductListResponse> => {
-        const response = await api.get<ApiResponse<ProductListResponse>>('/product', { params });
+        const response = await api.get<ApiResponse<ProductListResponse>>('/products', { params });
         return response.data.data;
     },
 
     createProduct: async (productData: Omit<Product, 'id'>): Promise<Product> => {
-        const response = await api.post<ApiResponse<Product>>('/product', productData);
+        const response = await api.post<ApiResponse<Product>>('/products', productData);
         return response.data.data;
     },
 
     deleteProduct: async (id: number): Promise<void> => {
-        await api.delete<ApiResponse<void>>(`/product/${id}`);
+        await api.delete<ApiResponse<void>>(`/products/${id}`);
     },
 
     getProductById: async (id: number): Promise<ProductDetail> => {
-        const response = await api.get<ApiResponse<ProductDetail>>(`/product/${id}`);
+        const response = await api.get<ApiResponse<ProductDetail>>(`/products/${id}`);
         return response.data.data;
     },
 };

@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -20,7 +20,8 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "상품 검색")
-    public ResponseEntity<ApiResponse<ProductListResponseDto>> search(@ModelAttribute ProductSearchRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<ProductListResponseDto>> search(
+            @ModelAttribute ProductSearchRequestDto requestDto) {
         ProductListResponseDto responseDto = productService.search(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("상품 검색 성공", responseDto));
     }
@@ -28,7 +29,7 @@ public class ProductController {
     @GetMapping("/{id}")
     @Operation(summary = "특정 상품 상세 정보")
     public ResponseEntity<ApiResponse<ProductDetailResponseDto>> getProduct(@PathVariable("id") Long id) {
-        ProductDetailResponseDto responseDto= productService.getProduct(id);
+        ProductDetailResponseDto responseDto = productService.getProduct(id);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("상품 상세 정보 조회 성공", responseDto));
     }
 }

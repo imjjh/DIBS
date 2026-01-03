@@ -301,13 +301,38 @@ export default function MyPage() {
                                 <div className="p-3 bg-white/20 w-fit rounded-2xl mb-6 backdrop-blur-md border border-white/20">
                                     <Store className="w-6 h-6 text-white" />
                                 </div>
-                                <h2 className="text-3xl font-black mb-3 tracking-tighter leading-tight">DIBS! <br />판매자 권한 신청</h2>
-                                <p className="text-white/80 text-sm font-black mb-10 leading-relaxed italic">
-                                    "당신의 가치 있는 제품을 <br />수천 명의 대기 유저에게 직접 제안하세요."
-                                </p>
-                                <button className="w-full py-5 bg-white text-primary font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3 group-hover:gap-5 duration-300 shadow-xl shadow-black/20">
-                                    판매자 센터 입점 신청 <ChevronRight className="w-6 h-6" />
-                                </button>
+                                {user?.roles?.includes('ROLE_SELLER') ? (
+                                    <>
+                                        <h2 className="text-3xl font-black mb-3 tracking-tighter leading-tight">DIBS! <br />판매자 센터 이동</h2>
+                                        <p className="text-white/80 text-sm font-black mb-10 leading-relaxed italic">
+                                            "이미 판매자 권한을 보유 중이시군요! <br />지금 바로 상품 관리를 시작하세요."
+                                        </p>
+                                        <button
+                                            onClick={() => router.push('/seller')}
+                                            className="w-full py-5 bg-white text-primary font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3 group-hover:gap-5 duration-300 shadow-xl shadow-black/20"
+                                        >
+                                            판매자 센터 바로가기 <ChevronRight className="w-6 h-6" />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="text-3xl font-black mb-3 tracking-tighter leading-tight">DIBS! <br />판매자 권한 신청</h2>
+                                        <p className="text-white/80 text-sm font-black mb-10 leading-relaxed italic">
+                                            "당신의 가치 있는 제품을 <br />수천 명의 대기 유저에게 직접 제안하세요."
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                const { becomeSeller } = useAuthStore.getState();
+                                                becomeSeller();
+                                                alert("판매자 전환이 완료되었습니다! 판매자 센터로 이동합니다.");
+                                                router.push('/seller');
+                                            }}
+                                            className="w-full py-5 bg-white text-primary font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3 group-hover:gap-5 duration-300 shadow-xl shadow-black/20"
+                                        >
+                                            판매자 센터 입점 신청 <ChevronRight className="w-6 h-6" />
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
 

@@ -12,6 +12,7 @@ interface AuthState {
     signup: (credentials: SignupCredentials) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
+    becomeSeller: () => void; // Mock function for UI demo
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -78,6 +79,19 @@ export const useAuthStore = create<AuthState>()(
                     console.error("checkAuth: Failed", error);
                     set({ user: null, isAuthenticated: false, isLoading: false });
                 }
+            },
+
+            becomeSeller: () => {
+                set((state) => {
+                    if (state.user) {
+                        const updatedUser = {
+                            ...state.user,
+                            roles: Array.from(new Set([...(state.user.roles || []), 'ROLE_SELLER']))
+                        };
+                        return { user: updatedUser };
+                    }
+                    return state;
+                });
             },
         }),
         {
