@@ -12,20 +12,24 @@ export default function LoginPage() {
         password: ''
     });
 
-    const { login, isLoading, error, isAuthenticated } = useAuthStore();
+    const { login, isLoading, error, isAuthenticated, user } = useAuthStore();
     const router = useRouter();
 
     useEffect(() => {
         if (isAuthenticated) {
-            router.push('/');
+            if (user?.roles?.includes('ROLE_ADMIN')) {
+                router.push('/admin');
+            } else {
+                router.push('/');
+            }
         }
-    }, [isAuthenticated, router]);
+    }, [isAuthenticated, user, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await login(credentials);
-            router.push('/');
+            // useAuthStore state will be updated, useEffect will handle redirect
         } catch (err) {
             console.error("Login failed", err);
         }

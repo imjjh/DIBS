@@ -1,0 +1,267 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import {
+    sellerService
+} from '@/services/sellerService';
+import {
+    SellerApplication
+} from '@/types';
+import {
+    Check,
+    X,
+    AlertCircle,
+    Search,
+    ChevronLeft,
+    ChevronRight,
+    Loader2,
+    Store
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export default function AdminSellerApplications() {
+    const [applications, setApplications] = useState<SellerApplication[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [rejectingId, setRejectingId] = useState<number | null>(null);
+    const [rejectReason, setRejectReason] = useState('');
+
+    const fetchApplications = async () => {
+        setLoading(true);
+        try {
+            const data = await sellerService.getApplications({ page, size: 10 });
+            setApplications(data.items);
+            setTotalPages(data.totalPages);
+        } catch (error) {
+            console.error('Failed to fetch applications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchApplications();
+    }, [page]);
+
+    const handleApprove = async (id: number) => {
+        if (!confirm('정말 이 판매자를 승인하시겠습니까?')) return;
+        try {
+            await sellerService.approveApplication(id);
+            alert('승인되었습니다.');
+            fetchApplications();
+        } catch (error) {
+            alert('승인 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleReject = async (id: number) => {
+        if (!rejectReason) {
+            alert('거절 사유를 입력해주세요.');
+            return;
+        }
+        try {
+            await sellerService.rejectApplication(id, rejectReason);
+            alert('거절되었습니다.');
+            setRejectingId(null);
+            setRejectReason('');
+            fetchApplications();
+        } catch (error) {
+            alert('거절 중 오류가 발생했습니다.');
+        }
+    };
+
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h1 className="text-4xl font-black tracking-tight mb-2">판매자 신청 관리</h1>
+                    <p className="text-muted-foreground font-medium">입점 신청한 판매자들의 정보를 검토하고 승인하세요.</p>
+                </div>
+            </div>
+
+            {/* Stats Overview (Mini) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-secondary/20 border border-border p-6 rounded-[2rem] flex items-center gap-4">
+                    <div className="p-3 bg-amber-500/10 text-amber-500 rounded-2xl">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Pending</p>
+                        <p className="text-2xl font-black">심사 대기중</p>
+                    </div>
+                </div>
+                <div className="bg-secondary/20 border border-border p-6 rounded-[2rem] flex items-center gap-4">
+                    <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl">
+                        <Check className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Approved</p>
+                        <p className="text-2xl font-black">매일 성장중</p>
+                    </div>
+                </div>
+                <div className="bg-secondary/20 border border-border p-6 rounded-[2rem] flex items-center gap-4">
+                    <div className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl">
+                        <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Note</p>
+                        <p className="text-sm font-bold text-muted-foreground">신중하게 검토하세요.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Applications Table */}
+            <div className="bg-background border border-border rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/5">
+                <div className="p-8 border-b border-border bg-secondary/5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2.5 bg-primary text-primary-foreground rounded-xl">
+                            <Store className="w-5 h-5" />
+                        </div>
+                        <span className="font-black tracking-tight">신청 목록</span>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-secondary/5 text-muted-foreground border-b border-border">
+                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">ID</th>
+                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">User ID</th>
+                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">상호명</th>
+                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">사업자 번호</th>
+                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">상태</th>
+                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">액션</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={6} className="px-8 py-20 text-center">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <Loader2 className="w-10 h-10 animate-spin text-primary opacity-20" />
+                                            <p className="text-sm font-black text-muted-foreground">데이터를 불러오는 중...</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : applications.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-8 py-20 text-center">
+                                        <p className="text-sm font-black text-muted-foreground">신청 내역이 없습니다.</p>
+                                    </td>
+                                </tr>
+                            ) : (
+                                applications.map((app) => (
+                                    <tr key={app.id} className="hover:bg-secondary/5 transition-colors group">
+                                        <td className="px-8 py-6 font-black text-sm">{app.id}</td>
+                                        <td className="px-8 py-6 font-bold text-muted-foreground text-sm">{app.userId}</td>
+                                        <td className="px-8 py-6">
+                                            <p className="font-black text-foreground">{app.businessName}</p>
+                                        </td>
+                                        <td className="px-8 py-6 text-sm font-bold text-muted-foreground">{app.businessNumber}</td>
+                                        <td className="px-8 py-6">
+                                            <span className={cn(
+                                                "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                                app.status === '대기 중' && "bg-amber-500/10 text-amber-500",
+                                                app.status === '승인' && "bg-emerald-500/10 text-emerald-500",
+                                                app.status === '거절' && "bg-rose-500/10 text-rose-500"
+                                            )}>
+                                                {app.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            {app.status === '대기 중' && (
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleApprove(app.id)}
+                                                        className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all active:scale-90"
+                                                        title="승인"
+                                                    >
+                                                        <Check className="w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setRejectingId(app.id)}
+                                                        className="p-2 bg-rose-500/10 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all active:scale-90"
+                                                        title="거절"
+                                                    >
+                                                        <X className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {app.status === '거절' && app.rejectReason && (
+                                                <p className="text-xs text-rose-500 font-bold max-w-[150px] truncate" title={app.rejectReason}>
+                                                    사유: {app.rejectReason}
+                                                </p>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="p-8 border-t border-border flex items-center justify-between bg-secondary/5">
+                    <p className="text-sm font-bold text-muted-foreground">
+                        Page <span className="font-black text-foreground">{page + 1}</span> of <span className="font-black text-foreground">{totalPages || 1}</span>
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="p-3 border border-border rounded-xl hover:bg-background disabled:opacity-30 transition-all active:scale-90"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                            disabled={page + 1 >= totalPages}
+                            onClick={() => setPage(page + 1)}
+                            className="p-3 border border-border rounded-xl hover:bg-background disabled:opacity-30 transition-all active:scale-90"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Reject Modal (Simple Overlay) */}
+            {rejectingId && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-background border border-border p-10 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] space-y-8 animate-in zoom-in-95 duration-300">
+                        <div>
+                            <h2 className="text-3xl font-black tracking-tight mb-2">거절 사유 입력</h2>
+                            <p className="text-muted-foreground text-sm font-medium">판매자에게 전달될 거절 사유를 입력해주세요.</p>
+                        </div>
+
+                        <textarea
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            placeholder="예: 사업자 정보가 올바르지 않습니다."
+                            className="w-full h-32 bg-secondary/20 border border-border rounded-2xl p-6 text-sm font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+                        />
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => {
+                                    setRejectingId(null);
+                                    setRejectReason('');
+                                }}
+                                className="flex-1 py-4 border border-border font-black rounded-2xl hover:bg-secondary transition-all active:scale-95"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={() => handleReject(rejectingId)}
+                                className="flex-1 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all active:scale-95 shadow-lg shadow-rose-500/20"
+                            >
+                                거절 확정
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
