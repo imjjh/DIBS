@@ -3,7 +3,6 @@ package com.imjjh.Dibs.api.product.dto;
 import com.imjjh.Dibs.api.product.entity.ProductEntity;
 import lombok.Builder;
 
-
 @Builder
 public record ProductDetailResponseDto(
         Long id,
@@ -26,13 +25,12 @@ public record ProductDetailResponseDto(
 
         Long specialPrice,
 
-        Integer discountRate
-) {
+        Integer discountRate) {
 
     public static ProductDetailResponseDto of(ProductEntity productEntity) {
         return ProductDetailResponseDto.builder()
                 .id(productEntity.getId())
-                .sellerName(productEntity.getSeller().getNickName())
+                .sellerName(productEntity.getSeller().getNickname())
                 .name(productEntity.getName())
                 .description(productEntity.getDescription())
                 .price(productEntity.getPrice())

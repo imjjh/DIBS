@@ -30,7 +30,7 @@ public class UserEntity extends BaseTimeEntity {
     private String providerId; // kakaoId, naverId
 
     @Column(length = 100)
-    private String nickName;
+    private String nickname;
 
     @Column(length = 100)
     private String username;
@@ -57,6 +57,13 @@ public class UserEntity extends BaseTimeEntity {
      * @param roleType
      */
     public void addRole(RoleType roleType) {
+        // 이미 해당 권한을 가지고 있다면 중복 추가 하지 않음
+        boolean hasRole = this.roles.stream()
+                .anyMatch(r -> r.getRole().equals(roleType));
+
+        if (hasRole)
+            return;
+
         UserRole userRole = UserRole.builder()
                 .user(this)
                 .role(roleType)
@@ -75,10 +82,10 @@ public class UserEntity extends BaseTimeEntity {
      * @param email
      */
     @Builder(builderMethodName = "socialBuilder")
-    public UserEntity(String provider, String providerId, String nickName, String username, String email) {
+    public UserEntity(String provider, String providerId, String nickname, String username, String email) {
         this.provider = provider;
         this.providerId = providerId;
-        this.nickName = nickName;
+        this.nickname = nickname;
         this.username = username;
         this.email = email;
         this.password = null;
@@ -93,10 +100,10 @@ public class UserEntity extends BaseTimeEntity {
      * @param password
      */
     @Builder
-    public UserEntity(String nickName, String username, String email, String password) {
+    public UserEntity(String nickname, String username, String email, String password) {
         this.provider = null;
         this.providerId = null;
-        this.nickName = nickName;
+        this.nickname = nickname;
         this.username = username;
         this.email = email;
         this.password = password;

@@ -19,7 +19,7 @@ public record RegisterRequestDto(
     public static UserEntity toEntity(RegisterRequestDto requestDto) {
         return UserEntity.builder()
                 .email(requestDto.email())
-                .nickName(requestDto.nickname())
+                .nickname(requestDto.nickname())
                 .username(requestDto.username())
                 .build();
     }

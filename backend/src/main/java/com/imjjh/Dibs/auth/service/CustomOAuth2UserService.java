@@ -93,7 +93,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             UserEntity newUser = UserEntity.socialBuilder()
                     .username(username) // 내부용 ID (springSecurity 필수)
-                    .nickName(nickname) // 화면 표시용 (kakao Nickname)
+                    .nickname(nickname) // 화면 표시용 (kakao Nickname)
                     .email(email)
                     .provider(provider)
                     .providerId(providerId)

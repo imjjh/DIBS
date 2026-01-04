@@ -7,7 +7,7 @@ export interface User {
     id: number;
     email: string;
     name: string;
-    nickName?: string;
+    nickname?: string;
     points: number;
     roles: string[];
 }
@@ -22,7 +22,7 @@ export interface SignupCredentials {
     username: string;
     password?: string;
     email: string;
-    nickName?: string;
+    nickname?: string;
 }
 
 export interface AuthResponse {
@@ -142,4 +142,53 @@ export interface CartItem {
     userId: number;
     count: number;
     product: Product;
+}
+
+export enum ApplicationStatus {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED'
+}
+
+export interface SellerApplication {
+    id: number;
+    userId: number;
+    businessName: string;
+    businessNumber: string;
+    status: string; // "대기 중", "승인", "거절" (Backend CaseBuilder result)
+    rejectReason?: string;
+}
+
+export interface SellerApplicationRequest {
+    businessName: string;
+    businessNumber: string;
+}
+
+export interface SellerApplicationSearchRequest {
+    page?: number;
+    size?: number;
+}
+
+export interface SellerApplicationListResponse {
+    items: SellerApplication[];
+    totalElements: number;
+    page: number;
+    size: number;
+    totalPages: number;
+}
+export interface SellerApplication {
+    id: number;
+    userId: number;
+    businessName: string;
+    businessNumber: string;
+    status: string;
+    rejectReason?: string;
+}
+
+export interface SellerApplicationListResponse {
+    items: SellerApplication[];
+    totalElements: number;
+    page: number;
+    size: number;
+    totalPages: number;
 }

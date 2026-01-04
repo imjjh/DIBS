@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
+import SellerOnboarding from '@/components/seller/SellerOnboarding';
 
 export default function MyPage() {
     const { user, isAuthenticated, logout, checkAuth } = useAuthStore();
@@ -73,7 +74,7 @@ export default function MyPage() {
                             <div className="w-36 h-36 rounded-[3rem] bg-gradient-to-br from-primary via-purple-500 to-pink-500 p-1 shadow-2xl transition-all duration-500 group-hover:rotate-3 group-hover:scale-105">
                                 <div className="w-full h-full bg-background rounded-[2.8rem] flex items-center justify-center overflow-hidden">
                                     <span className="text-6xl font-black text-primary">
-                                        {(user?.nickName || user?.name || 'U')[0].toUpperCase()}
+                                        {(user?.nickname || user?.name || 'U')[0].toUpperCase()}
                                     </span>
                                 </div>
                             </div>
@@ -85,7 +86,7 @@ export default function MyPage() {
                         {/* User Metadata */}
                         <div className="flex-1 text-center md:text-left space-y-3">
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                                <h1 className="text-5xl font-black tracking-tighter">{user?.nickName || user?.name || '회원님'}</h1>
+                                <h1 className="text-5xl font-black tracking-tighter">{user?.nickname || user?.name || '회원님'}</h1>
                                 <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
                                     <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                                     <span className="text-[10px] font-black text-primary uppercase tracking-widest leading-none">
@@ -292,49 +293,7 @@ export default function MyPage() {
 
                     {/* Dashboard Tools */}
                     <div className="lg:col-span-4 space-y-8">
-                        {/* Seller Onboarding Card */}
-                        <div className="bg-gradient-to-br from-primary via-indigo-600 to-purple-700 p-10 rounded-[3rem] text-white shadow-2xl shadow-primary/30 relative overflow-hidden group border border-white/10">
-                            <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-150 transition-transform duration-700 pointer-events-none">
-                                <Store className="w-32 h-32" />
-                            </div>
-                            <div className="relative z-10">
-                                <div className="p-3 bg-white/20 w-fit rounded-2xl mb-6 backdrop-blur-md border border-white/20">
-                                    <Store className="w-6 h-6 text-white" />
-                                </div>
-                                {user?.roles?.includes('ROLE_SELLER') ? (
-                                    <>
-                                        <h2 className="text-3xl font-black mb-3 tracking-tighter leading-tight">DIBS! <br />판매자 센터 이동</h2>
-                                        <p className="text-white/80 text-sm font-black mb-10 leading-relaxed italic">
-                                            "이미 판매자 권한을 보유 중이시군요! <br />지금 바로 상품 관리를 시작하세요."
-                                        </p>
-                                        <button
-                                            onClick={() => router.push('/seller')}
-                                            className="w-full py-5 bg-white text-primary font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3 group-hover:gap-5 duration-300 shadow-xl shadow-black/20"
-                                        >
-                                            판매자 센터 바로가기 <ChevronRight className="w-6 h-6" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <h2 className="text-3xl font-black mb-3 tracking-tighter leading-tight">DIBS! <br />판매자 권한 신청</h2>
-                                        <p className="text-white/80 text-sm font-black mb-10 leading-relaxed italic">
-                                            "당신의 가치 있는 제품을 <br />수천 명의 대기 유저에게 직접 제안하세요."
-                                        </p>
-                                        <button
-                                            onClick={() => {
-                                                const { becomeSeller } = useAuthStore.getState();
-                                                becomeSeller();
-                                                alert("판매자 전환이 완료되었습니다! 판매자 센터로 이동합니다.");
-                                                router.push('/seller');
-                                            }}
-                                            className="w-full py-5 bg-white text-primary font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3 group-hover:gap-5 duration-300 shadow-xl shadow-black/20"
-                                        >
-                                            판매자 센터 입점 신청 <ChevronRight className="w-6 h-6" />
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+                        <SellerOnboarding />
 
                         {/* Quick Utility Menu */}
                         <div className="bg-background border border-border rounded-[3rem] p-6 space-y-3 shadow-xl shadow-black/5">

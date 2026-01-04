@@ -144,7 +144,7 @@ export function Header() {
                                 <div className="hidden md:flex flex-col items-start leading-tight">
                                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">My Account</span>
                                     <span className="text-sm font-black text-foreground">
-                                        {user?.nickName || user?.name || '회원님'}
+                                        {user?.nickname || user?.name || '회원님'}
                                     </span>
                                 </div>
                             </Link>

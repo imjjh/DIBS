@@ -5,6 +5,7 @@ import java.util.List;
 
 /**
  * 현재 유저 정보를 반환 해주는 dto로 감싸 반환해주는 클래스
+ * 
  * @param id
  * @param email
  * @param name
@@ -21,7 +22,7 @@ public record CurrentUserResponseDto(Long id, String email, String name, List<St
         return new CurrentUserResponseDto(
                 userEntity.getId(),
                 userEntity.getEmail(),
-                userEntity.getNickName(),
+                userEntity.getNickname(),
                 roles);
     }
 

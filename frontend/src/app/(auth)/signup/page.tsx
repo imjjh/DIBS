@@ -76,7 +76,7 @@ export default function SignupPage() {
                 username: formData.username,
                 password: formData.password,
                 email: formData.email,
-                nickName: formData.nickname
+                nickname: formData.nickname
             });
             router.push('/login?signup=success');
         } catch (err) {
