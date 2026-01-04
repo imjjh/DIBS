@@ -31,6 +31,7 @@ public class AuthService {
 
     /**
      * 사용 중인 ID 확인
+     * 
      * @param username
      */
     public void validUsername(String username) {
@@ -40,9 +41,9 @@ public class AuthService {
         }
     }
 
-
     /**
      * 회원가입
+     * 
      * @param requestDto
      */
     public void register(RegisterRequestDto requestDto) {
@@ -77,12 +78,13 @@ public class AuthService {
 
         // 토큰 생성을 위한 인증 객체 생성
         CustomUserDetails userDetails = new CustomUserDetails(userEntity);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
 
         // access & refresh token 생성
         String accessToken = jwtTokenProvider.createAccessToken(authentication);
         String refreshToken = jwtTokenProvider.createRefreshToken(authentication);
 
-       return new LoginResponseDto(accessToken,refreshToken,userEntity);
+        return new LoginResponseDto(accessToken, refreshToken, userEntity);
     }
 }

@@ -5,6 +5,10 @@ import lombok.Builder;
 
 @Builder
 public record SellerApplicationResponseDto(
+        Long id,
+
+        Long userId,
+
         String businessName,
 
         String businessNumber,
@@ -15,9 +19,12 @@ public record SellerApplicationResponseDto(
 ) {
     public static SellerApplicationResponseDto of(SellerApplicationEntity sellerApplicationEntity) {
         return SellerApplicationResponseDto.builder()
-                .businessNumber(sellerApplicationEntity.getBusinessNumber())
+                .id(sellerApplicationEntity.getId())
+                .userId(sellerApplicationEntity.getUser().getId())
                 .businessName(sellerApplicationEntity.getBusinessName())
+                .businessNumber(sellerApplicationEntity.getBusinessNumber())
                 .status(sellerApplicationEntity.getApplicationStatus().getStatus())
+                .rejectReason(sellerApplicationEntity.getRejectReason())
                 .build();
     }
 }

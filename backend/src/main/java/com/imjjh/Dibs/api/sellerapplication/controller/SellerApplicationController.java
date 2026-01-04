@@ -43,8 +43,8 @@ public class SellerApplicationController {
     @PatchMapping("/admin/seller/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> approveSellerApplication(@PathVariable("id") Long id,
-            @Valid @RequestBody SellerApplicationApproveReqeustDto reqeustDto) {
-        sellerApplicationService.approveSellerApplication(id, reqeustDto);
+            @Valid @RequestBody SellerApplicationApproveRequestDto requestDto) {
+        sellerApplicationService.approveSellerApplication(id, requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("판매자 승인 완료", null));
     }
 
@@ -53,7 +53,7 @@ public class SellerApplicationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SellerApplicationListResponseDto>> getSellerApplications(
             @ModelAttribute SellerApplicationSearchRequestDto requestDto) {
-        SellerApplicationListResponseDto responseDto = sellerApplicationService.getSellerApplications(requestDto);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("판매자 승인 완료", responseDto));
+        SellerApplicationListResponseDto responseDto = sellerApplicationService.searchApplications(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("신청 목록 조회 성공", responseDto));
     }
 }

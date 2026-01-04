@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface SellerApplicationRepository extends JpaRepository<SellerApplicationEntity, Long> {
+public interface SellerApplicationRepository extends JpaRepository<SellerApplicationEntity, Long>, SellerApplicationRepositoryCustom {
     Optional<SellerApplicationEntity> findByUserId(Long userId);
+
 }

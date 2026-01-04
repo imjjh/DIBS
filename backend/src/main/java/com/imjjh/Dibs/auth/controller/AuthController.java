@@ -38,7 +38,6 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequestDto requestDto) {
         authService.register(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of("회원가입 성공", null));

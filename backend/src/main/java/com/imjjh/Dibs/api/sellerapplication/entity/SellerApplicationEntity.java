@@ -40,4 +40,11 @@ public class SellerApplicationEntity extends BaseTimeEntity {
 
     @Schema(nullable = true, description = "거절 시 사유")
     private String rejectReason;
+
+    /**
+     * 신청 승인
+     */
+    public void approve() {
+        this.applicationStatus = ApplicationStatus.APPROVED;
+    }
 }
