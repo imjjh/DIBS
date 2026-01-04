@@ -13,3 +13,9 @@ spring:
     url: jdbc:mysql://localhost:3307/dibs?serverTimezone=UTC&useSSL=false&createDatabaseIfNotExist=true
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.imjjh.Dibs: DEBUG

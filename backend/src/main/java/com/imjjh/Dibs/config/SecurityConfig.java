@@ -21,7 +21,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import java.util.List;
 
 @Configuration
@@ -36,10 +36,16 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+
+                CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+                // CSRF의 XOR 암호화 기능을 끄고 평문(Plain)으로 통신
+                requestHandler.setCsrfRequestAttributeName(null);
+
                 http
                         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                         .csrf(csrf-> csrf
                                 .csrfTokenRepository(cookieCsrfTokenRepository())
+                                .csrfTokenRequestHandler(requestHandler)
                                 .ignoringRequestMatchers("/oauth2/**", "/login/**", "/api/auth/**" ) // 인증 없이 접근 가능한 경로 CSRF 검사 제외 (로그인 전 등)
                         )
                         .httpBasic(AbstractHttpConfigurer::disable)
@@ -66,7 +72,7 @@ public class SecurityConfig {
                         .exceptionHandling(exceptionHandling-> exceptionHandling.authenticationEntryPoint(((request, response, authException) -> {
                                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                                 response.setContentType("application/json;charset=UTF-8");
-                                response.getWriter().write("{\\\"status\\\":401,\\\"message\\\":\\\"Unauthorized\\\"}");
+                                response.getWriter().write("{\"status\":401,\"message\":\"Unauthorized\"}");
                         })))
 
                         .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class) // csrf 필터는 jwt 앞이든 뒤든 크게 상관없음?
