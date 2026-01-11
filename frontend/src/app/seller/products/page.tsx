@@ -32,8 +32,9 @@ export default function SellerProductsPage() {
                 setIsLoading(true);
                 // Temporary: fetch all and filter by current user if sellerId exists
                 // In real world, this would be GET /api/seller/products
-                const response = await axios.get<ApiResponse<{ items: Product[] }>>('/products');
-                const allItems = response.data.data.items;
+                const response = await axios.get<ApiResponse<ProductListResponse>>('/products');
+                const pagedResponse = response.data.data;
+                const allItems = pagedResponse.items;
 
                 // Filtering locally for demo since we haven't touched backend
                 const myItems = allItems.filter(p => p.sellerId === user?.id);

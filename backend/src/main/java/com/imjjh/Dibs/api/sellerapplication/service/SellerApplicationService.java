@@ -8,17 +8,15 @@ import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
+import com.imjjh.Dibs.common.dto.PagedResponse;
 import com.imjjh.Dibs.common.exception.ResourceNotFoundException;
 import com.imjjh.Dibs.common.exception.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +69,6 @@ public class SellerApplicationService {
         UserEntity userEntity = userRepository.findById(sellerApplicationEntity.getUser().getId())
                 .orElseThrow(() -> new UserNotFoundException("신청자를 찾을 수 없습니다."));
 
-
         // 이미 승인된 상태라면 return
         if (sellerApplicationEntity.getApplicationStatus().equals(ApplicationStatus.APPROVED)) {
             return;
@@ -85,23 +82,11 @@ public class SellerApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public SellerApplicationListResponseDto searchApplications(SellerApplicationSearchRequestDto requestDto) {
+    public PagedResponse<SellerApplicationResponseDto> searchApplications(SellerApplicationSearchRequestDto requestDto) {
 
-        int page = Optional.ofNullable(requestDto.page()).orElse(0);
-        int size = Optional.ofNullable(requestDto.size()).orElse(10);
+        Page<SellerApplicationResponseDto> pageResult = sellerApplicationRepository.search(requestDto, requestDto.toPageable());
 
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<SellerApplicationResponseDto> pageResult = sellerApplicationRepository.search(requestDto, pageable);
-
-
-        return SellerApplicationListResponseDto.builder()
-                .items(pageResult.getContent())
-                .page(pageResult.getNumber())
-                .size(pageResult.getSize())
-                .totalElements(pageResult.getTotalElements())
-                .totalPages(pageResult.getTotalPages())
-                .build();
+        return PagedResponse.of(pageResult);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.imjjh.Dibs.api.product.dto.request;
 
 
+import com.imjjh.Dibs.common.dto.PageableRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record ProductSearchRequestDto(
@@ -15,5 +16,5 @@ public record ProductSearchRequestDto(
 
         @Schema(description = "카테고리 필드", example = "노트북")
         String category
-        )
-{}
+
+) implements PageableRequest {}

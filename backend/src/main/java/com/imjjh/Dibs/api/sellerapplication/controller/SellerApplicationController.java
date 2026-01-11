@@ -4,6 +4,7 @@ import com.imjjh.Dibs.api.sellerapplication.dto.*;
 import com.imjjh.Dibs.api.sellerapplication.service.SellerApplicationService;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.common.dto.ApiResponse;
+import com.imjjh.Dibs.common.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +52,9 @@ public class SellerApplicationController {
     @Operation(description = "관리자의 신청 목록 검색")
     @GetMapping("/admin/seller-applications")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<SellerApplicationListResponseDto>> getSellerApplications(
+    public ResponseEntity<ApiResponse<PagedResponse<SellerApplicationResponseDto>>> getSellerApplications(
             @ModelAttribute SellerApplicationSearchRequestDto requestDto) {
-        SellerApplicationListResponseDto responseDto = sellerApplicationService.searchApplications(requestDto);
+        PagedResponse<SellerApplicationResponseDto> responseDto = sellerApplicationService.searchApplications(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("신청 목록 조회 성공", responseDto));
     }
 }

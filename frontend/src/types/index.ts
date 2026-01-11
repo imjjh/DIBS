@@ -62,13 +62,15 @@ export interface ProductSearchParams {
     lastProductId?: number;
 }
 
-export interface ProductListResponse {
-    items: Product[];
+export interface PagedResponse<T> {
+    items: T[];
     totalElements: number;
+    totalPages: number;
     page: number;
     size: number;
-    totalPages: number;
 }
+
+export interface ProductListResponse extends PagedResponse<Product> { }
 
 export interface Event {
     id: number;
@@ -169,26 +171,4 @@ export interface SellerApplicationSearchRequest {
     size?: number;
 }
 
-export interface SellerApplicationListResponse {
-    items: SellerApplication[];
-    totalElements: number;
-    page: number;
-    size: number;
-    totalPages: number;
-}
-export interface SellerApplication {
-    id: number;
-    userId: number;
-    businessName: string;
-    businessNumber: string;
-    status: string;
-    rejectReason?: string;
-}
-
-export interface SellerApplicationListResponse {
-    items: SellerApplication[];
-    totalElements: number;
-    page: number;
-    size: number;
-    totalPages: number;
-}
+export interface SellerApplicationListResponse extends PagedResponse<SellerApplication> { }

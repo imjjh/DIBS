@@ -54,7 +54,7 @@ export default function StorePage() {
             const response = await productService.getProducts({
                 category: selectedCategory === "전체" ? undefined : selectedCategory,
                 keyword: debouncedSearchQuery || undefined,
-                page: 0,
+                page: 1,
                 size: 12
             });
 
@@ -79,7 +79,7 @@ export default function StorePage() {
                 category: selectedCategory === "전체" ? undefined : selectedCategory,
                 keyword: debouncedSearchQuery || undefined,
                 lastProductId: lastProduct?.id,
-                page: Math.floor(products.length / 12),
+                page: Math.floor(products.length / 12) + 1,
                 size: 12
             });
 
