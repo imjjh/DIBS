@@ -26,6 +26,8 @@ import { SellerApplication, SellerApplicationListResponse, ApiResponse } from '@
 export default function AdminPage() {
     const [applications, setApplications] = useState<SellerApplication[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [rejectingId, setRejectingId] = useState<number | null>(null);
+    const [rejectReason, setRejectReason] = useState('');
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalProducts: 0,
@@ -58,14 +60,34 @@ export default function AdminPage() {
         fetchApplications();
     }, [fetchApplications]);
 
-    const handleApprove = async (id: number, approve: boolean) => {
+    const handleApprove = async (id: number) => {
+        if (!confirm('정말 이 판매자를 승인하시겠습니까?')) return;
         try {
             await axios.patch(`/admin/seller/${id}`, {
-                approve,
-                rejectReason: approve ? null : '승인 거절되었습니다.'
+                approve: true
             });
-            alert(approve ? '승인되었습니다.' : '거절되었습니다.');
-            fetchApplications(); // Refresh list
+            alert('승인되었습니다.');
+            fetchApplications();
+        } catch (error) {
+            console.error('Action failed:', error);
+            alert('처리에 실패했습니다.');
+        }
+    };
+
+    const handleReject = async (id: number) => {
+        if (!rejectReason || rejectReason.trim() === '') {
+            alert('거절 사유를 입력해주세요.');
+            return;
+        }
+        try {
+            await axios.patch(`/admin/seller/${id}`, {
+                approve: false,
+                rejectReason
+            });
+            alert('거절되었습니다.');
+            setRejectingId(null);
+            setRejectReason('');
+            fetchApplications();
         } catch (error) {
             console.error('Action failed:', error);
             alert('처리에 실패했습니다.');
@@ -196,13 +218,16 @@ export default function AdminPage() {
                                                 {app.status === '대기 중' && (
                                                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                                                         <button
-                                                            onClick={() => handleApprove(app.id, true)}
+                                                            onClick={() => handleApprove(app.id)}
                                                             className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-xl hover:scale-105 transition-all"
                                                         >
                                                             승인
                                                         </button>
                                                         <button
-                                                            onClick={() => handleApprove(app.id, false)}
+                                                            onClick={() => {
+                                                                setRejectReason('');
+                                                                setRejectingId(app.id);
+                                                            }}
                                                             className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black rounded-xl hover:bg-red-500 hover:text-white transition-all"
                                                         >
                                                             거절
@@ -256,6 +281,43 @@ export default function AdminPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Reject Modal */}
+            {rejectingId && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-[#0f0f12] border border-white/10 p-10 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] space-y-8 animate-in zoom-in-95 duration-300">
+                        <div>
+                            <h2 className="text-3xl font-black tracking-tight mb-2 text-white">거절 사유 입력</h2>
+                            <p className="text-white/40 text-sm font-medium">판매자에게 전달될 거절 사유를 입력해주세요.</p>
+                        </div>
+
+                        <textarea
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            placeholder="예: 사업자 정보가 올바르지 않습니다."
+                            className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-6 text-sm font-bold placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none text-white"
+                        />
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => {
+                                    setRejectingId(null);
+                                    setRejectReason('');
+                                }}
+                                className="flex-1 py-4 border border-white/10 font-black rounded-2xl hover:bg-white/5 transition-all active:scale-95 text-white"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={() => handleReject(rejectingId)}
+                                className="flex-1 py-4 bg-red-500 text-white font-black rounded-2xl hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20"
+                            >
+                                거절 확정
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

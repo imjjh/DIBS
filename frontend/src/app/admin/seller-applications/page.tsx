@@ -47,7 +47,7 @@ export default function AdminSellerApplications() {
     const handleApprove = async (id: number) => {
         if (!confirm('정말 이 판매자를 승인하시겠습니까?')) return;
         try {
-            await sellerService.approveApplication(id);
+            await sellerService.reviewApplication(id, true);
             alert('승인되었습니다.');
             fetchApplications();
         } catch (error) {
@@ -56,12 +56,15 @@ export default function AdminSellerApplications() {
     };
 
     const handleReject = async (id: number) => {
-        if (!rejectReason) {
+        console.log('handleReject called with id:', id);
+        console.log('Current rejectReason:', rejectReason);
+
+        if (!rejectReason || rejectReason.trim() === '') {
             alert('거절 사유를 입력해주세요.');
             return;
         }
         try {
-            await sellerService.rejectApplication(id, rejectReason);
+            await sellerService.reviewApplication(id, false, rejectReason);
             alert('거절되었습니다.');
             setRejectingId(null);
             setRejectReason('');
@@ -181,7 +184,14 @@ export default function AdminSellerApplications() {
                                                         <Check className="w-5 h-5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => setRejectingId(app.id)}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            console.log('Reject button clicked for app.id:', app.id);
+                                                            console.log('Setting rejectingId to:', app.id);
+                                                            setRejectReason('');
+                                                            setRejectingId(app.id);
+                                                        }}
                                                         className="p-2 bg-rose-500/10 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all active:scale-90"
                                                         title="거절"
                                                     >

@@ -32,16 +32,9 @@ export const sellerService = {
     },
 
     /**
-     * [관리자] 판매자 신청 승인
+     * [관리자] 판매자 신청 심사 (승인/거절)
      */
-    approveApplication: async (id: number): Promise<void> => {
-        await api.patch<ApiResponse<void>>(`/admin/seller/${id}`, { approve: true });
-    },
-
-    /**
-     * [관리자] 판매자 신청 거절
-     */
-    rejectApplication: async (id: number, reason: string): Promise<void> => {
-        await api.patch<ApiResponse<void>>(`/admin/seller/${id}`, { approve: false, rejectReason: reason });
+    reviewApplication: async (id: number, approve: boolean, rejectReason?: string): Promise<void> => {
+        await api.patch<ApiResponse<void>>(`/admin/seller/${id}`, { approve, rejectReason });
     }
 };
