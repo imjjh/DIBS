@@ -47,4 +47,9 @@ public class SellerApplicationEntity extends BaseTimeEntity {
     public void approve() {
         this.applicationStatus = ApplicationStatus.APPROVED;
     }
+
+    public void reject(String rejectReason){
+        this.applicationStatus = ApplicationStatus.REJECTED;
+        this.rejectReason = rejectReason;
+    }
 }

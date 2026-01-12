@@ -40,13 +40,13 @@ public class SellerApplicationController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("판매자 신청 현황", responseDto));
     }
 
-    @Operation(description = "관리자가 판매자 신청 승인")
+    @Operation(description = "관리자가 판매자 신청 승인 또는 거절")
     @PatchMapping("/admin/seller/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> approveSellerApplication(@PathVariable("id") Long id,
+    public ResponseEntity<ApiResponse<Void>> reviewSellerApplication(@PathVariable("id") Long id,
             @Valid @RequestBody SellerApplicationApproveRequestDto requestDto) {
-        sellerApplicationService.approveSellerApplication(id, requestDto);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("판매자 승인 완료", null));
+        sellerApplicationService.reviewSellerApplication(id, requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("판매자 신청 리뷰 완료", null));
     }
 
     @Operation(description = "관리자의 신청 목록 검색")

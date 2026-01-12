@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class SellerApplicationService {
@@ -54,14 +53,14 @@ public class SellerApplicationService {
     }
 
     /**
-     * 관리자의 특정 판매 신청서 승인
+     * 관리자의 특정 판매 신청서 승인 또는 거절
      * 
      * @param applicationId
      * @param requestDto
      * @return
      */
     @Transactional
-    public void approveSellerApplication(Long applicationId, @Valid SellerApplicationApproveRequestDto requestDto) {
+    public void reviewSellerApplication(Long applicationId, @Valid SellerApplicationApproveRequestDto requestDto) {
 
         SellerApplicationEntity sellerApplicationEntity = sellerApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("판매 신청서를 찾을 수 없습니다."));
@@ -69,22 +68,28 @@ public class SellerApplicationService {
         UserEntity userEntity = userRepository.findById(sellerApplicationEntity.getUser().getId())
                 .orElseThrow(() -> new UserNotFoundException("신청자를 찾을 수 없습니다."));
 
-        // 이미 승인된 상태라면 return
-        if (sellerApplicationEntity.getApplicationStatus().equals(ApplicationStatus.APPROVED)) {
+        // 이미 처리한 신청이라면 return
+        if (!sellerApplicationEntity.getApplicationStatus().equals(ApplicationStatus.PENDING)) {
             return;
         }
 
         // 승인 처리
-        sellerApplicationEntity.approve();
+        if (requestDto.approve()) {
+            sellerApplicationEntity.approve();
+            // 판매자 권한 추가
+            userEntity.addRole(RoleType.SELLER);
+        } else {
+            sellerApplicationEntity.reject(requestDto.rejectReason());
+        }
 
-        // 판매자 권한 추가
-        userEntity.addRole(RoleType.SELLER);
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<SellerApplicationResponseDto> searchApplications(SellerApplicationSearchRequestDto requestDto) {
+    public PagedResponse<SellerApplicationResponseDto> searchApplications(
+            SellerApplicationSearchRequestDto requestDto) {
 
-        Page<SellerApplicationResponseDto> pageResult = sellerApplicationRepository.search(requestDto, requestDto.toPageable());
+        Page<SellerApplicationResponseDto> pageResult = sellerApplicationRepository.search(requestDto,
+                requestDto.toPageable());
 
         return PagedResponse.of(pageResult);
     }
