@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
                 set({ isLoading: true, error: null });
                 try {
                     const response = await authService.login(credentials);
-                    set({ user: response.user, isAuthenticated: true, isLoading: false });
+                    set({ user: response, isAuthenticated: true, isLoading: false });
                 } catch (error: any) {
                     let errorMessage = '로그인에 실패했습니다.';
                     if (error.response) {
