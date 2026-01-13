@@ -123,7 +123,7 @@ export default function SellerOnboarding() {
     }
 
     // Case 3: Rejected Application
-    if (status?.status === '거절') {
+    if (status?.status === '거절' && !showForm) {  // ← showForm이 false일 때만 거절 UI
         return (
             <div className="bg-gradient-to-br from-rose-500 to-red-700 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group border border-white/10">
                 <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-125 transition-transform duration-700">
@@ -139,7 +139,15 @@ export default function SellerOnboarding() {
                         <p className="text-sm font-black leading-relaxed">{status.rejectReason || '정보가 불일치하거나 부적절한 사업자 정보입니다.'}</p>
                     </div>
                     <button
-                        onClick={() => setShowForm(true)}
+                        onClick={() => {
+                            console.log('다시 신청하기 버튼 클릭');
+                            console.log('현재 status:', status);
+                            // 기존 정보로 폼 초기화
+                            setBusinessName(status.businessName || '');
+                            setBusinessNumber(status.businessNumber || '');
+                            setShowForm(true);
+                            console.log('showForm을 true로 설정');
+                        }}
                         className="w-full py-5 bg-white text-rose-600 font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl shadow-black/20"
                     >
                         다시 신청하기 <ChevronRight className="w-6 h-6" />
@@ -177,8 +185,20 @@ export default function SellerOnboarding() {
                     <form onSubmit={handleApply} className="space-y-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-2xl font-black tracking-tight">판매자 정보 입력</h2>
-                            <button type="button" onClick={() => setShowForm(false)} className="text-xs font-bold opacity-60 hover:opacity-100 uppercase tracking-widest underline underline-offset-4">뒤로가기</button>
+                            <button type="button" onClick={() => {
+                                setShowForm(false);
+                                setBusinessName('');
+                                setBusinessNumber('');
+                                setError('');
+                            }} className="text-xs font-bold opacity-60 hover:opacity-100 uppercase tracking-widest underline underline-offset-4">뒤로가기</button>
                         </div>
+
+                        {status?.status === '거절' && (
+                            <div className="flex items-center gap-2 p-4 bg-amber-500/20 border border-amber-500/30 rounded-2xl text-amber-100 text-xs font-bold">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                이전 신청이 거절되었습니다. 정보를 수정하여 다시 신청하세요.
+                            </div>
+                        )}
 
                         <div className="space-y-4">
                             <div className="space-y-2">
