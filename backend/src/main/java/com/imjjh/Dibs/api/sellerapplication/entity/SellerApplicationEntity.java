@@ -48,8 +48,27 @@ public class SellerApplicationEntity extends BaseTimeEntity {
         this.applicationStatus = ApplicationStatus.APPROVED;
     }
 
+    /**
+     * 신청 거절
+     * @param rejectReason
+     */
     public void reject(String rejectReason){
         this.applicationStatus = ApplicationStatus.REJECTED;
         this.rejectReason = rejectReason;
     }
+
+
+    /**
+     * 거절 후 재신청
+     * @param businessName
+     * @param businessNumber
+     */
+    public void reapply(String businessName, String businessNumber){
+        this.businessName = businessName;
+        this.businessNumber = businessNumber;
+
+        this.applicationStatus=ApplicationStatus.PENDING;
+        this.rejectReason = null;
+    }
+
 }

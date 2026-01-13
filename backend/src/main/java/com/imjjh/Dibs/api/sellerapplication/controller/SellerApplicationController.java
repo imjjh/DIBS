@@ -21,7 +21,7 @@ public class SellerApplicationController {
 
     private final SellerApplicationService sellerApplicationService;
 
-    @Operation(description = "일반 유저의 판매자 권한 신청")
+    @Operation(description = "일반 유저의 판매자 권한 신청 (재신청 포함)")
     @PostMapping("/seller/apply")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> createSellerApplication(
@@ -44,7 +44,7 @@ public class SellerApplicationController {
     @PatchMapping("/admin/seller/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> reviewSellerApplication(@PathVariable("id") Long id,
-            @Valid @RequestBody SellerApplicationApproveRequestDto requestDto) {
+            @Valid @RequestBody SellerApplicationReviewRequestDto requestDto) {
         sellerApplicationService.reviewSellerApplication(id, requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("판매자 신청 리뷰 완료", null));
     }

@@ -33,6 +33,12 @@ public class GlobalExceptionHandler {
                 ApiResponse.of(e.getMessage(), null));
     }
 
+    @ExceptionHandler(DuplicateApplicationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateApplicationException(DuplicateApplicationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                ApiResponse.of(e.getMessage(), null));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllException(Exception e) {
         log.error("정의되지 않은 에러 발생: ", e);
@@ -52,8 +58,8 @@ public class GlobalExceptionHandler {
                 ApiResponse.of(e.getMessage(), null));
     }
 
-    @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidInputException(InvalidInputException e) {
+    @ExceptionHandler(InvalidOrMissingFieldException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidOrMissingFieldException(InvalidOrMissingFieldException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ApiResponse.of(e.getMessage(), null));
     }

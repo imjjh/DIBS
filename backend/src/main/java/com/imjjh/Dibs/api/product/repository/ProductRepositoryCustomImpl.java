@@ -2,8 +2,6 @@ package com.imjjh.Dibs.api.product.repository;
 
 import com.imjjh.Dibs.api.product.dto.request.ProductSearchRequestDto;
 import com.imjjh.Dibs.api.product.dto.response.ProductSimpleResponseDto;
-import com.imjjh.Dibs.api.product.entity.StatusType;
-import com.imjjh.Dibs.api.product.service.ProductService;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.imjjh.Dibs.api.product.entity.QProductEntity.productEntity;
-import static com.querydsl.core.types.dsl.Expressions.*;
 
 @RequiredArgsConstructor
 @Repository

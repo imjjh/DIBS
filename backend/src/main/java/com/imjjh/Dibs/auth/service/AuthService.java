@@ -4,17 +4,14 @@ import com.imjjh.Dibs.auth.JwtTokenProvider;
 import com.imjjh.Dibs.auth.dto.LoginRequestDto;
 import com.imjjh.Dibs.auth.dto.LoginResponseDto;
 import com.imjjh.Dibs.auth.dto.RegisterRequestDto;
-import com.imjjh.Dibs.auth.dto.ValidUsernameRequestDto;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.Dibs.common.exception.DuplicateLoginIdException;
-import com.imjjh.Dibs.common.exception.InvalidInputException;
+import com.imjjh.Dibs.common.exception.InvalidOrMissingFieldException;
 import com.imjjh.Dibs.common.exception.UserNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,7 +70,7 @@ public class AuthService {
         // 비밀 번호 검증
         boolean matches = passwordEncoder.matches(requestDto.password(), userEntity.getPassword());
         if (!matches) {
-            throw new InvalidInputException("잘못된 아이디 또는 비밀번호 입니다.");
+            throw new InvalidOrMissingFieldException("잘못된 아이디 또는 비밀번호 입니다.");
         }
 
         // 토큰 생성을 위한 인증 객체 생성

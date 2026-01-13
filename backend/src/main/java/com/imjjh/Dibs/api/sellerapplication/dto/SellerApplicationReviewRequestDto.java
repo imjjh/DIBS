@@ -1,6 +1,6 @@
 package com.imjjh.Dibs.api.sellerapplication.dto;
 
-public record SellerApplicationApproveRequestDto(
+public record SellerApplicationReviewRequestDto(
         boolean approve,
         String rejectReason) {
 }
