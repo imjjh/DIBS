@@ -15,18 +15,18 @@ export function Footer() {
                     <div>
                         <h4 className="font-semibold mb-4">쇼핑하기</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/deal" className="hover:text-foreground">타임딜</Link></li>
-                            <li><Link href="/best" className="hover:text-foreground">베스트</Link></li>
-                            <li><Link href="/coupons" className="hover:text-foreground">쿠폰존</Link></li>
+                            <li><span className="hover:text-foreground cursor-default">타임딜</span></li>
+                            <li><span className="hover:text-foreground cursor-default">베스트</span></li>
+                            <li><span className="hover:text-foreground cursor-default">쿠폰존</span></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="font-semibold mb-4">고객센터</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/faq" className="hover:text-foreground">자주 묻는 질문</Link></li>
-                            <li><Link href="/notice" className="hover:text-foreground">공지사항</Link></li>
-                            <li><Link href="/inquiry" className="hover:text-foreground">1:1 문의</Link></li>
+                            <li><span className="hover:text-foreground cursor-default">자주 묻는 질문</span></li>
+                            <li><span className="hover:text-foreground cursor-default">공지사항</span></li>
+                            <li><span className="hover:text-foreground cursor-default">1:1 문의</span></li>
                         </ul>
                     </div>
 

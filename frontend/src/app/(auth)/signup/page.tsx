@@ -210,7 +210,7 @@ export default function SignupPage() {
                         <label className="flex items-start gap-3 cursor-pointer group">
                             <input type="checkbox" required className="mt-1 accent-primary" />
                             <span className="text-xs text-muted-foreground font-medium leading-relaxed group-hover:text-foreground transition-colors">
-                                [필수] <Link href="/terms" className="underline">이용약관</Link> 및 <Link href="/privacy" className="underline">개인정보처리방침</Link>에 동의합니다.
+                                [필수] <span className="underline cursor-default">이용약관</span> 및 <span className="underline cursor-default">개인정보처리방침</span>에 동의합니다.
                             </span>
                         </label>
                     </div>
