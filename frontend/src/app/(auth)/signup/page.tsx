@@ -20,6 +20,8 @@ export default function SignupPage() {
     const [localError, setLocalError] = useState<string | null>(null);
     const [usernameStatus, setUsernameStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [usernameMessage, setUsernameMessage] = useState('');
+    const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [emailMessage, setEmailMessage] = useState('');
 
     const USERNAME_REGEX = /^[a-zA-Z0-9]{4,20}$/;
 
@@ -30,6 +32,10 @@ export default function SignupPage() {
         if (name === 'username') {
             setUsernameStatus('idle');
             setUsernameMessage('');
+        }
+        if (name === 'email') {
+            setEmailStatus('idle');
+            setEmailMessage('');
         }
     };
 
@@ -48,12 +54,37 @@ export default function SignupPage() {
 
         setUsernameStatus('loading');
         try {
-            await authService.validUsername(formData.username);
+            await authService.validateUsername(formData.username);
             setUsernameStatus('success');
             setUsernameMessage('사용 가능한 아이디입니다.');
         } catch (err: any) {
             setUsernameStatus('error');
             setUsernameMessage(err.response?.data?.message || '이미 사용 중인 아이디입니다.');
+        }
+    };
+
+    const handleEmailCheck = async () => {
+        if (!formData.email) {
+            setEmailStatus('error');
+            setEmailMessage('이메일을 입력해주세요.');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setEmailStatus('error');
+            setEmailMessage('올바른 이메일 형식이 아닙니다.');
+            return;
+        }
+
+        setEmailStatus('loading');
+        try {
+            await authService.validateEmail(formData.email);
+            setEmailStatus('success');
+            setEmailMessage('사용 가능한 이메일입니다.');
+        } catch (err: any) {
+            setEmailStatus('error');
+            setEmailMessage(err.response?.data?.message || '이미 사용 중인 이메일입니다.');
         }
     };
 
@@ -68,6 +99,11 @@ export default function SignupPage() {
 
         if (usernameStatus !== 'success') {
             setLocalError('아이디 중복 확인을 해주세요.');
+            return;
+        }
+
+        if (emailStatus !== 'success') {
+            setLocalError('이메일 중복 확인을 해주세요.');
             return;
         }
 
@@ -168,17 +204,34 @@ export default function SignupPage() {
                                 </p>
                             )}
                         </div>
-                        <div className="group relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder="이메일 주소"
-                                required
-                                className="w-full pl-12 pr-4 py-4 bg-secondary/30 border border-transparent focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm"
-                            />
+                        <div className="space-y-2">
+                            <div className="group relative flex gap-2">
+                                <div className="relative flex-1">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        placeholder="이메일 주소"
+                                        required
+                                        className={`w-full pl-12 pr-4 py-4 bg-secondary/30 border ${emailStatus === 'success' ? 'border-primary/50' : emailStatus === 'error' ? 'border-destructive/50' : 'border-transparent'} focus:border-primary/50 focus:bg-background rounded-2xl focus:outline-none transition-all font-medium text-sm`}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleEmailCheck}
+                                    disabled={emailStatus === 'loading' || emailStatus === 'success'}
+                                    className="px-4 py-4 bg-secondary/50 hover:bg-secondary text-foreground text-xs font-bold rounded-2xl transition-all disabled:opacity-50 whitespace-nowrap"
+                                >
+                                    {emailStatus === 'loading' ? '확인 중...' : '중복 확인'}
+                                </button>
+                            </div>
+                            {emailMessage && (
+                                <p className={`text-[10px] font-bold px-2 ${emailStatus === 'success' ? 'text-primary' : 'text-destructive'}`}>
+                                    {emailMessage}
+                                </p>
+                            )}
                         </div>
                         <div className="group relative">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
