@@ -23,10 +23,10 @@ public class UserEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = true) // 일반 로그인 시 null
     private String provider; // kakao, naver
 
-    @Column(length = 100, unique = true)
+    @Column(length = 100, nullable = true, unique = true) // 일반 로그인 시 null
     private String providerId; // kakaoId, naverId
 
     @Column(length = 100)
@@ -36,10 +36,10 @@ public class UserEntity extends BaseTimeEntity {
     private String username;
 
     @Setter
-    @Column(length = 100, nullable = true)
+    @Column(length = 100, nullable = true) // 소셜 로그인 시 null
     private String password;
 
-    @Column(length = 100)
+    @Column(length = 100, nullable = true, unique = true) // 소셜 로그인 시 null
     private String email;
 
     // ==========================================
