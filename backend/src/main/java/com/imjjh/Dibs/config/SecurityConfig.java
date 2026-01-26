@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import java.util.List;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -58,8 +59,8 @@ public class SecurityConfig {
 
                         .authorizeHttpRequests(auth -> auth
                                         // 로그인 이전 허용 페이지
-                                        // 소셜 로그인 관련 URL과 로그인 페이지
-                                        .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll()
+                                        .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll() // 소셜 로그인 관련 URL과 로그인 페이지
+                                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // 상품 조회 페이지
                                         // 그외 모든 요청은 인증된 사용자만 접근 가능
                                         .anyRequest().authenticated())
 
