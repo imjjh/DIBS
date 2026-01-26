@@ -12,9 +12,11 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByProviderAndProviderId(String provider, String providerId);
 
+    Optional<UserEntity> findByEmail(String email);
+
     Optional<UserEntity> findByUsername(String username);
 
-    // 유저 정보 조회시 roles도 같이 가져오기
+    // 유저 정보 조회시 roles 같이 가져오기
     @EntityGraph(attributePaths = "roles")
     Optional<UserEntity> findWithRolesById(Long id);
 }

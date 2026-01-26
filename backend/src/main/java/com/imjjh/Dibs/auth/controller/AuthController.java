@@ -1,11 +1,7 @@
 package com.imjjh.Dibs.auth.controller;
 
 import com.imjjh.Dibs.auth.JwtTokenProvider;
-import com.imjjh.Dibs.auth.dto.CurrentUserResponseDto;
-import com.imjjh.Dibs.auth.dto.LoginRequestDto;
-import com.imjjh.Dibs.auth.dto.LoginResponseDto;
-import com.imjjh.Dibs.auth.dto.RegisterRequestDto;
-import com.imjjh.Dibs.auth.dto.ValidUsernameRequestDto;
+import com.imjjh.Dibs.auth.dto.*;
 import com.imjjh.Dibs.auth.service.AuthService;
 import com.imjjh.Dibs.auth.token.RefreshToken;
 import com.imjjh.Dibs.auth.token.repository.RefreshTokenRepository;
@@ -31,10 +27,16 @@ public class AuthController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthService authService;
 
-    @PostMapping("/validUsername")
-    public ResponseEntity<ApiResponse<Void>> validUsername(@Valid @RequestBody ValidUsernameRequestDto requestDto) {
-        authService.validUsername(requestDto.username());
+    @PostMapping("/validateUsername")
+    public ResponseEntity<ApiResponse<Void>> validateUsername(@Valid @RequestBody ValidUsernameRequestDto requestDto) {
+        authService.validateUsername(requestDto.username());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("사용 가능한 아이디 입니다.", null));
+    }
+
+    @PostMapping("/validateEmail")
+    public ResponseEntity<ApiResponse<Void>> validateEmail(@Valid @RequestBody ValidEmailRequestDto requestDto) {
+        authService.validateEmail(requestDto.email());
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of("사용 가능한 이메일 입니다.", null));
     }
 
     @PostMapping("/register")

@@ -1,7 +1,6 @@
 package com.imjjh.Dibs.common.exception;
 
 import com.imjjh.Dibs.common.dto.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +26,8 @@ public class GlobalExceptionHandler {
                 ApiResponse.of(message, null));
     }
 
-    @ExceptionHandler(DuplicateLoginIdException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateLoginIdException(DuplicateLoginIdException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                ApiResponse.of(e.getMessage(), null));
-    }
-
-    @ExceptionHandler(DuplicateApplicationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateApplicationException(DuplicateApplicationException e) {
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateResourceException(DuplicateResourceException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 ApiResponse.of(e.getMessage(), null));
     }

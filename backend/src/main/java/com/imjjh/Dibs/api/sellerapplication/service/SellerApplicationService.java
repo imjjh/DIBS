@@ -9,7 +9,7 @@ import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.Dibs.common.dto.PagedResponse;
-import com.imjjh.Dibs.common.exception.DuplicateApplicationException;
+import com.imjjh.Dibs.common.exception.DuplicateResourceException;
 import com.imjjh.Dibs.common.exception.InvalidOrMissingFieldException;
 import com.imjjh.Dibs.common.exception.ResourceNotFoundException;
 import com.imjjh.Dibs.common.exception.UserNotFoundException;
@@ -41,7 +41,7 @@ public class SellerApplicationService {
                     Boolean duplicated = sellerApplicationRepository.existsByBusinessNumber(requestDto.businessNumber());
 
                     if (duplicated) {
-                        throw new DuplicateApplicationException("이미 존재하는 사업자 번호입니다.");
+                        throw new DuplicateResourceException("이미 존재하는 사업자 번호입니다.");
                     }
 
                     SellerApplicationEntity entity = requestDto.toEntity(userDetails.getUserEntity());

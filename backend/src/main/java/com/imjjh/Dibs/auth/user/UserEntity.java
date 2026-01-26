@@ -32,7 +32,7 @@ public class UserEntity extends BaseTimeEntity {
     @Column(length = 100)
     private String nickname;
 
-    @Column(length = 100)
+    @Column(length = 100, unique = true)
     private String username;
 
     @Setter

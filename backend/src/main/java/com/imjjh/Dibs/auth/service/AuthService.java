@@ -8,7 +8,7 @@ import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
-import com.imjjh.Dibs.common.exception.DuplicateLoginIdException;
+import com.imjjh.Dibs.common.exception.DuplicateResourceException;
 import com.imjjh.Dibs.common.exception.InvalidOrMissingFieldException;
 import com.imjjh.Dibs.common.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +31,17 @@ public class AuthService {
      * 
      * @param username
      */
-    public void validUsername(String username) {
+    public void validateUsername(String username) {
         Optional<UserEntity> optionalUserEntity = userRepository.findByUsername(username);
         if (optionalUserEntity.isPresent()) {
-            throw new DuplicateLoginIdException("중복된 아이디 입니다.");
+            throw new DuplicateResourceException("중복된 아이디 입니다.");
+        }
+    }
+
+    public void validateEmail(String email) {
+        Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(email);
+        if (optionalUserEntity.isPresent()) {
+            throw new DuplicateResourceException("중복된 이메일 입니다."); // TODO: frontned 이메일, 아이디 중복 체크 버튼
         }
     }
 
@@ -44,6 +51,10 @@ public class AuthService {
      * @param requestDto
      */
     public void register(RegisterRequestDto requestDto) {
+
+        // 아이디 & 이메일 중복 체크
+        validateUsername(requestDto.username());
+        validateEmail(requestDto.email());
 
         UserEntity entity = RegisterRequestDto.toEntity(requestDto);
 
