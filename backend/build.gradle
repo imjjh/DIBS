@@ -34,9 +34,8 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// 테스트 의존성
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	// oauth2
@@ -63,7 +62,65 @@ dependencies {
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	// H2 데이터베이스 추가 (테스트 환경 전용)
+	testImplementation 'com.h2database:h2'
 }
+
+
+
+// 기본 테스트 (./gradlew test)
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// 단위 테스트 (./gradlew unitTest)
+tasks.register('unitTest', Test) {
+	group = 'verification'
+	description = 'Runs only unit tests (@Tag("unit"))'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	useJUnitPlatform {
+		includeTags 'unit'
+	}
+}
+
+// 통합 테스트 (./gradlew integrationTest)
+tasks.register('integrationTest', Test) {
+	group = 'verification'
+	description = 'Runs only integration tests (@Tag("integration"))'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	useJUnitPlatform {
+		includeTags 'integration'
+	}
+}
+
+// 모든 테스트 태스크(test, unitTest, integrationTest)에 공통 적용
+tasks.withType(Test){
+	testLogging {
+		// 통과, 스킵, 실패 이벤트를 콘솔에 출력
+		events "passed", "skipped", "failed"
+
+		// 실패 시 예외 내용 자세히 보기
+		exceptionFormat "full"
+	}
+}
+
+// 자바 소스 컴파일 시 UTF-8 사용
+tasks.withType(JavaCompile){
+	options.encoding = 'UTF-8'
+}
+
+// 테스트 실행 시 콘솔 출력 인코딩 UTF-8 사용
+tasks.withType(Test){
+	systemProperty 'file.encoding', 'UTF-8'
+}
+
 
 // Q-Type 생성 경로 설정
 def generatedDir = 'src/main/generated'
@@ -80,10 +137,7 @@ tasks.withType(JavaCompile) {
 	options.getGeneratedSourceOutputDirectory().set(file(generatedDir))
 }
 
-clean {
+tasks.named('clean'){
 	delete file(generatedDir)
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-}

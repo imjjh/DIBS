@@ -1,0 +1,19 @@
+package com.imjjh.common.annotation;
+
+import com.imjjh.common.constants.TestTypeConstants;
+import org.junit.jupiter.api.Tag;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.annotation.*;
+
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Tag(TestTypeConstants.INTEGRATION_TEST)
+@ActiveProfiles("test")
+@Transactional // 테스트 후 DB 자동 롤백
+@SpringBootTest
+public @interface IntegrationTest {
+
+}
