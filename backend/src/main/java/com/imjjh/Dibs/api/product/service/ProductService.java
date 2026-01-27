@@ -4,9 +4,11 @@ import com.imjjh.Dibs.api.product.dto.ProductDetailResponseDto;
 import com.imjjh.Dibs.api.product.dto.request.ProductSearchRequestDto;
 import com.imjjh.Dibs.api.product.dto.response.ProductSimpleResponseDto;
 import com.imjjh.Dibs.api.product.entity.ProductEntity;
+import com.imjjh.Dibs.api.product.exception.ProductErrorCode;
 import com.imjjh.Dibs.api.product.repository.ProductRepository;
 import com.imjjh.Dibs.common.dto.PagedResponse;
-import com.imjjh.Dibs.common.exception.ResourceNotFoundException;
+import com.imjjh.Dibs.common.exception.BusinessException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductDetailResponseDto getProduct(Long id) {
         ProductEntity productEntity = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         return ProductDetailResponseDto.of(productEntity);
     }

@@ -26,34 +26,17 @@ public class GlobalExceptionHandler {
                 ApiResponse.of(message, null));
     }
 
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateResourceException(DuplicateResourceException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                ApiResponse.of(e.getMessage(), null));
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus()).body(
+                ApiResponse.of(e.getErrorCode().getMessage(), null));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleAllException(Exception e) {
         log.error("정의되지 않은 에러 발생: ", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.of("서버 내부 에러가 발생했습니다.", null));
+                .body(ApiResponse.of(CommonErrorCode.INTERNAL_SERVER_ERROR.getMessage(), null));
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(UserNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.of(e.getMessage(), null));
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ApiResponse.of(e.getMessage(), null));
-    }
-
-    @ExceptionHandler(InvalidOrMissingFieldException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidOrMissingFieldException(InvalidOrMissingFieldException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ApiResponse.of(e.getMessage(), null));
-    }
 }

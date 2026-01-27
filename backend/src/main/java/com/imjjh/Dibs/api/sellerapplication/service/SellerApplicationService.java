@@ -3,16 +3,15 @@ package com.imjjh.Dibs.api.sellerapplication.service;
 import com.imjjh.Dibs.api.sellerapplication.dto.*;
 import com.imjjh.Dibs.api.sellerapplication.entity.ApplicationStatus;
 import com.imjjh.Dibs.api.sellerapplication.entity.SellerApplicationEntity;
+import com.imjjh.Dibs.api.sellerapplication.exception.SellerErrorCode;
+import com.imjjh.Dibs.auth.exception.AuthErrorCode;
 import com.imjjh.Dibs.api.sellerapplication.repository.SellerApplicationRepository;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.Dibs.common.dto.PagedResponse;
-import com.imjjh.Dibs.common.exception.DuplicateResourceException;
-import com.imjjh.Dibs.common.exception.InvalidOrMissingFieldException;
-import com.imjjh.Dibs.common.exception.ResourceNotFoundException;
-import com.imjjh.Dibs.common.exception.UserNotFoundException;
+import com.imjjh.Dibs.common.exception.BusinessException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,13 +34,15 @@ public class SellerApplicationService {
     @Transactional
     public void createSellerApplication(CustomUserDetails userDetails, SellerApplicationRequestDto requestDto) {
         // find or create
-        SellerApplicationEntity sellerApplicationEntity = sellerApplicationRepository.findByUserId(userDetails.getNameLong())
+        SellerApplicationEntity sellerApplicationEntity = sellerApplicationRepository
+                .findByUserId(userDetails.getNameLong())
                 .orElseGet(() -> {
                     // 신규 요청
-                    Boolean duplicated = sellerApplicationRepository.existsByBusinessNumber(requestDto.businessNumber());
+                    Boolean duplicated = sellerApplicationRepository
+                            .existsByBusinessNumber(requestDto.businessNumber());
 
                     if (duplicated) {
-                        throw new DuplicateResourceException("이미 존재하는 사업자 번호입니다.");
+                        throw new BusinessException(SellerErrorCode.DUPLICATE_BUSINESS_NUMBER);
                     }
 
                     SellerApplicationEntity entity = requestDto.toEntity(userDetails.getUserEntity());
@@ -50,15 +51,15 @@ public class SellerApplicationService {
 
         switch (sellerApplicationEntity.getApplicationStatus()) {
             case REJECTED -> {
-                sellerApplicationEntity.reapply(requestDto.businessName(),requestDto.businessNumber());
+                sellerApplicationEntity.reapply(requestDto.businessName(), requestDto.businessNumber());
             }
             case APPROVED -> {
-                throw new IllegalStateException("이미 승인된 신청입니다.");
+                throw new BusinessException(SellerErrorCode.ALREADY_APPROVED);
             }
-            case PENDING -> {}
+            case PENDING -> {
+            }
         }
     }
-
 
     /**
      * 일반 유저의 판매자 신청 현황 조회
@@ -71,7 +72,7 @@ public class SellerApplicationService {
         Long userId = Long.valueOf(userDetails.getName());
 
         SellerApplicationEntity sellerApplicationEntity = sellerApplicationRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("신청 내역을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(SellerErrorCode.APPLICATION_NOT_FOUND));
 
         return SellerApplicationResponseDto.of(sellerApplicationEntity);
     }
@@ -87,15 +88,15 @@ public class SellerApplicationService {
     public void reviewSellerApplication(Long applicationId, @Valid SellerApplicationReviewRequestDto requestDto) {
 
         // 거절시 거절 사유 필수
-        if (!requestDto.approve() && (requestDto.rejectReason() == null || requestDto.rejectReason().isBlank() )) {
-            throw new InvalidOrMissingFieldException("거절 사유를 입력해 주세요.");
+        if (!requestDto.approve() && (requestDto.rejectReason() == null || requestDto.rejectReason().isBlank())) {
+            throw new BusinessException(SellerErrorCode.REJECT_REASON_REQUIRED);
         }
 
         SellerApplicationEntity sellerApplicationEntity = sellerApplicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ResourceNotFoundException("판매 신청서를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(SellerErrorCode.APPLICATION_NOT_FOUND));
 
         UserEntity userEntity = userRepository.findById(sellerApplicationEntity.getUser().getId())
-                .orElseThrow(() -> new UserNotFoundException("신청자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.USER_NOT_FOUND));
 
         // 이미 처리한 신청이라면 return
         if (!sellerApplicationEntity.getApplicationStatus().equals(ApplicationStatus.PENDING)) {

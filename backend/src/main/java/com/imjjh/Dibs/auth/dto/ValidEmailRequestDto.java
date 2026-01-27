@@ -2,6 +2,7 @@ package com.imjjh.Dibs.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import com.imjjh.Dibs.common.dto.ValidationMessage;
 
 /**
  * 사용 중인 Email 확인
@@ -9,5 +10,5 @@ import jakarta.validation.constraints.Email;
  * @param email
  */
 public record ValidEmailRequestDto(
-                @Schema(description = "유저 이메일", example = "test123@test.com") @Email(message = "이메일 형식이 올바르지 않습니다.") String email) {
+        @Schema(description = "유저 이메일", example = "test123@test.com") @Email(message = ValidationMessage.INVALID_EMAIL) String email) {
 }

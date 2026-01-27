@@ -8,9 +8,8 @@ import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
-import com.imjjh.Dibs.common.exception.DuplicateResourceException;
-import com.imjjh.Dibs.common.exception.InvalidOrMissingFieldException;
-import com.imjjh.Dibs.common.exception.UserNotFoundException;
+import com.imjjh.Dibs.common.exception.BusinessException;
+import com.imjjh.Dibs.auth.exception.AuthErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,14 +33,14 @@ public class AuthService {
     public void validateUsername(String username) {
         Optional<UserEntity> optionalUserEntity = userRepository.findByUsername(username);
         if (optionalUserEntity.isPresent()) {
-            throw new DuplicateResourceException("중복된 아이디 입니다.");
+            throw new BusinessException(AuthErrorCode.DUPLICATE_USERNAME);
         }
     }
 
     public void validateEmail(String email) {
         Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(email);
         if (optionalUserEntity.isPresent()) {
-            throw new DuplicateResourceException("중복된 이메일 입니다."); // TODO: frontned 이메일, 아이디 중복 체크 버튼
+            throw new BusinessException(AuthErrorCode.DUPLICATE_EMAIL);
         }
     }
 
@@ -76,12 +75,12 @@ public class AuthService {
      */
     public LoginResponseDto login(LoginRequestDto requestDto) {
         UserEntity userEntity = userRepository.findByUsername(requestDto.username())
-                .orElseThrow(() -> new UserNotFoundException("잘못된 아이디 또는 비밀번호 입니다."));
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.LOGIN_FAILED));
 
         // 비밀 번호 검증
         boolean matches = passwordEncoder.matches(requestDto.password(), userEntity.getPassword());
         if (!matches) {
-            throw new InvalidOrMissingFieldException("잘못된 아이디 또는 비밀번호 입니다.");
+            throw new BusinessException(AuthErrorCode.LOGIN_FAILED);
         }
 
         // 토큰 생성을 위한 인증 객체 생성
