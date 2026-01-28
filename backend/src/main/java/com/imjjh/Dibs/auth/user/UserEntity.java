@@ -10,6 +10,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 /**
  * 유저 엔티티 클래스
  *
@@ -17,6 +20,8 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Getter
+@SQLDelete(sql = "UPDATE user_entity SET is_deleted = true where id = ?")
+@SQLRestriction("is_deleted = false")
 public class UserEntity extends BaseTimeEntity {
 
     @Id

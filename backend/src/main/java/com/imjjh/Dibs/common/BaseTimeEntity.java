@@ -1,6 +1,5 @@
 package com.imjjh.Dibs.common;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -24,4 +23,6 @@ public abstract class BaseTimeEntity {
     @Column
     private LocalDateTime modifiedAt;
 
+    @Column
+    private boolean isDeleted = false;
 }

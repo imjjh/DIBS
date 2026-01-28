@@ -1,5 +1,8 @@
 package com.imjjh.Dibs.api.sellerapplication.entity;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.BaseTimeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
+@SQLDelete(sql = "UPDATE seller_application_entity SET is_deleted = true where id = ?")
+@SQLRestriction("is_deleted = false")
 public class SellerApplicationEntity extends BaseTimeEntity {
 
     @Id
@@ -50,24 +55,25 @@ public class SellerApplicationEntity extends BaseTimeEntity {
 
     /**
      * 신청 거절
+     * 
      * @param rejectReason
      */
-    public void reject(String rejectReason){
+    public void reject(String rejectReason) {
         this.applicationStatus = ApplicationStatus.REJECTED;
         this.rejectReason = rejectReason;
     }
 
-
     /**
      * 거절 후 재신청
+     * 
      * @param businessName
      * @param businessNumber
      */
-    public void reapply(String businessName, String businessNumber){
+    public void reapply(String businessName, String businessNumber) {
         this.businessName = businessName;
         this.businessNumber = businessNumber;
 
-        this.applicationStatus=ApplicationStatus.PENDING;
+        this.applicationStatus = ApplicationStatus.PENDING;
         this.rejectReason = null;
     }
 

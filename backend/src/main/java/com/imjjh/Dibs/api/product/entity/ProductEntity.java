@@ -6,12 +6,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @NoArgsConstructor
 @Getter
+@SQLDelete(sql = "UPDATE product_entity SET is_deleted = true where id = ?")
+@SQLRestriction("is_deleted = false")
 public class ProductEntity extends BaseTimeEntity {
 
     @Id
