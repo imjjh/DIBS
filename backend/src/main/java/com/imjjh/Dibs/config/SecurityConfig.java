@@ -36,52 +36,65 @@ public class SecurityConfig {
         private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
         @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+        public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService)
+                        throws Exception {
 
                 CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
                 // CSRF의 XOR 암호화 기능을 끄고 평문(Plain)으로 통신
                 requestHandler.setCsrfRequestAttributeName(null);
 
                 http
-                        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                        .csrf(csrf-> csrf
-                                .csrfTokenRepository(cookieCsrfTokenRepository())
-                                .csrfTokenRequestHandler(requestHandler)
-                                .ignoringRequestMatchers("/oauth2/**", "/login/**", "/api/auth/**" ) // 인증 없이 접근 가능한 경로 CSRF 검사 제외 (로그인 전 등)
-                        )
-                        .httpBasic(AbstractHttpConfigurer::disable)
-                        .formLogin(AbstractHttpConfigurer::disable)
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .csrf(csrf -> csrf
+                                                .csrfTokenRepository(cookieCsrfTokenRepository())
+                                                .csrfTokenRequestHandler(requestHandler)
+                                                // 인증 없이 접근 가능한 경로 CSRF 검사 제외 (로그인 전 등)
+                                                // Swagger UI 테스트 편의를 위해 추가 // TODO: local profile에서만 사용
+                                                .ignoringRequestMatchers("/api/images", "/oauth2/**", "/login/**",
+                                                                "/api/auth/**"))
+                                .httpBasic(AbstractHttpConfigurer::disable)
+                                .formLogin(AbstractHttpConfigurer::disable)
 
-                        // 스프링 시큐리티는 기본적으로 세션을 사용
-                        // JWT 사용시 세션을 아예 생성하지 않도록 (Stateless) 설정
-                        .sessionManagement(session -> session
-                                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                // 스프링 시큐리티는 기본적으로 세션을 사용
+                                // JWT 사용시 세션을 아예 생성하지 않도록 (Stateless) 설정
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                        .authorizeHttpRequests(auth -> auth
-                                        // 로그인 이전 허용 페이지
-                                        .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll() // 소셜 로그인 관련 URL과 로그인 페이지
-                                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // 상품 조회 페이지
-                                        // 그외 모든 요청은 인증된 사용자만 접근 가능
-                                        .anyRequest().authenticated())
+                                .authorizeHttpRequests(auth -> auth
+                                                // 로그인 이전 허용 페이지
+                                                // 소셜 로그인 관련 URL과 로그인 페이지
+                                                .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**",
+                                                                "/swagger-ui/**", "/v3/api-docs/**")
+                                                .permitAll()
+                                                // 상품 조회 페이지
+                                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                                                // 그외 모든 요청은 인증된 사용자만 접근 가능
+                                                .anyRequest().authenticated())
 
-                        .oauth2Login(oauth2 -> oauth2
-                                        .userInfoEndpoint(userInfo -> userInfo
-                                                        .userService(customOAuth2UserService))
-                                        .successHandler(oAuth2LoginSuccessHandler)
-                                        .failureHandler(oAuth2LoginFailureHandler))
+                                .oauth2Login(oauth2 -> oauth2
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService))
+                                                .successHandler(oAuth2LoginSuccessHandler)
+                                                .failureHandler(oAuth2LoginFailureHandler))
 
-                        .exceptionHandling(exceptionHandling-> exceptionHandling.authenticationEntryPoint(((request, response, authException) -> {
-                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                                response.setContentType("application/json;charset=UTF-8");
-                                response.getWriter().write("{\"status\":401,\"message\":\"Unauthorized\"}");
-                        })))
+                                .exceptionHandling(exceptionHandling -> exceptionHandling
+                                                .authenticationEntryPoint(((request, response, authException) -> {
+                                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                                        response.setContentType("application/json;charset=UTF-8");
+                                                        response.getWriter().write(
+                                                                        "{\"status\":401,\"message\":\"Unauthorized\"}");
+                                                })))
+                                // 필터 동작 순서
+                                // JwtAuthenticationFilter
+                                // -> UsernamePasswordAuthenticationFilter
+                                // -> CsrfCookieFilter
+                                // UsernamePasswordAuthenticationFilter -> CsrfCookieFilter
+                                .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class)
+                                // JwtAuthenticationFilter -> UsernamePasswordAuthenticationFilter
+                                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                                                UsernamePasswordAuthenticationFilter.class);
 
-                        .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class) // csrf 필터는 jwt 앞이든 뒤든 크게 상관없음?
-
-                        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                                        UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+                return http.build();
         }
 
         @Bean
@@ -98,9 +111,10 @@ public class SecurityConfig {
                 return source;
         }
 
-
         /**
-         * withHttpOnlyFalse()는 내부적으로 CookieCsrfTokenRepository를 생성하고, 쿠키 이름은 XSRF-TOKEN, HttpOnly는 false로 자동 설정해주는 메서드입니다.
+         * withHttpOnlyFalse()는 내부적으로 CookieCsrfTokenRepository를 생성하고, 쿠키 이름은
+         * XSRF-TOKEN, HttpOnly는 false로 자동 설정해주는 메서드입니다.
+         * 
          * @return
          */
         @Bean
@@ -108,15 +122,14 @@ public class SecurityConfig {
                 return CookieCsrfTokenRepository.withHttpOnlyFalse();
         }
 
-
         /**
          * password 암호화를 위한 encoder
+         * 
          * @return
          */
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
         }
-
 
 }
