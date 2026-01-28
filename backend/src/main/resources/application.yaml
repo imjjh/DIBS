@@ -51,6 +51,17 @@ spring:
       host: localhost
       port: 6379
 
+  cloud:
+    aws:
+      credentials:
+        access-key: ${S3-ACCESS-KEY}
+        secret-key: ${S3-SECRET-KEY}
+      s3:
+        bucket: ${S3-BUCKET-NAME}
+      region:
+        static: ap-northeast-2
+
+
 jwt:
   secret: ${JWT_SECRET_KEY}
   expiration: 86400000
