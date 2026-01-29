@@ -97,7 +97,7 @@ public class SecurityConfig {
                 return http.build();
         }
 
-        @Bean
+        @Bean // TODO: BFF 패턴 CORS가 발생되지 않음 -> IP whiteList로 BFF만 허용하게 수정
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(
