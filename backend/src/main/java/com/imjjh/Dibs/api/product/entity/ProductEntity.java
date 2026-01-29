@@ -1,7 +1,7 @@
 package com.imjjh.Dibs.api.product.entity;
 
 import com.imjjh.Dibs.auth.user.UserEntity;
-import com.imjjh.Dibs.common.BaseTimeEntity;
+import com.imjjh.Dibs.common.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -15,9 +15,9 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @NoArgsConstructor
 @Getter
-@SQLDelete(sql = "UPDATE product_entity SET is_deleted = true where id = ?")
-@SQLRestriction("is_deleted = false")
-public class ProductEntity extends BaseTimeEntity {
+@SQLDelete(sql = "UPDATE product_entity SET deleted_at = now() where id = ?")
+@SQLRestriction("deleted_at IS NULL")
+public class ProductEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

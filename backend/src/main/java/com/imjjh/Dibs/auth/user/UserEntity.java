@@ -1,6 +1,6 @@
 package com.imjjh.Dibs.auth.user;
 
-import com.imjjh.Dibs.common.BaseTimeEntity;
+import com.imjjh.Dibs.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,9 +20,9 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @NoArgsConstructor
 @Getter
-@SQLDelete(sql = "UPDATE user_entity SET is_deleted = true where id = ?")
-@SQLRestriction("is_deleted = false")
-public class UserEntity extends BaseTimeEntity {
+@SQLDelete(sql = "UPDATE user_entity SET deleted_at = now() where id = ?")
+@SQLRestriction("deleted_at IS NULL")
+public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

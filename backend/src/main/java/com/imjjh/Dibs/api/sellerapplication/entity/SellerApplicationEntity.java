@@ -4,7 +4,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.imjjh.Dibs.auth.user.UserEntity;
-import com.imjjh.Dibs.common.BaseTimeEntity;
+import com.imjjh.Dibs.common.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-@SQLDelete(sql = "UPDATE seller_application_entity SET is_deleted = true where id = ?")
-@SQLRestriction("is_deleted = false")
-public class SellerApplicationEntity extends BaseTimeEntity {
+@SQLDelete(sql = "UPDATE seller_application_entity SET deleted_at = now() where id = ?")
+@SQLRestriction("deleted_at IS NULL")
+public class SellerApplicationEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
