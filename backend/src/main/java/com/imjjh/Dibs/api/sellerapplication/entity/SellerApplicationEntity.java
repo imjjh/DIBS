@@ -25,8 +25,8 @@ public class SellerApplicationEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "applied_user")
+    @OneToOne
+    @JoinColumn(name = "applied_user", unique = true)
     @Schema(description = "신청한 유저")
     private UserEntity user;
 
