@@ -13,7 +13,7 @@ export default function AdminProductsPage() {
         setIsLoading(true);
         try {
             const data = await productService.getProducts();
-            setProducts(data);
+            setProducts(data.items);
         } catch (error) {
             console.error(error);
         } finally {

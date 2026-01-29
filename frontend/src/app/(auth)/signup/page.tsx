@@ -59,7 +59,8 @@ export default function SignupPage() {
             setUsernameMessage('사용 가능한 아이디입니다.');
         } catch (err: any) {
             setUsernameStatus('error');
-            setUsernameMessage(err.response?.data?.message || '이미 사용 중인 아이디입니다.');
+            const errorMessage = err.response?.data?.message || '아이디 확인 중 에러가 발생했습니다.';
+            setUsernameMessage(errorMessage);
         }
     };
 
@@ -84,7 +85,8 @@ export default function SignupPage() {
             setEmailMessage('사용 가능한 이메일입니다.');
         } catch (err: any) {
             setEmailStatus('error');
-            setEmailMessage(err.response?.data?.message || '이미 사용 중인 이메일입니다.');
+            const errorMessage = err.response?.data?.message || '이메일 확인 중 에러가 발생했습니다.';
+            setEmailMessage(errorMessage);
         }
     };
 

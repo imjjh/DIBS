@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: process.env.NEXT_PUBLIC_S3_HOSTNAME || '',
+      },
     ],
   },
   async rewrites() {

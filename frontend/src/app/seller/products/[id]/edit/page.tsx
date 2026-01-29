@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import {
     ArrowLeft,
     Upload,
@@ -13,24 +13,30 @@ import {
     Save,
     X,
     Loader2,
-    CheckCircle2
+    CheckCircle2,
+    AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import axios from '@/lib/axios';
 import { productService } from '@/services/productService';
 import { imageService } from '@/services/imageService';
+import { ProductStatus } from '@/types';
 import { useRef } from 'react';
 
-export default function NewProductPage() {
+export default function EditProductPage() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
+    const params = useParams();
+    const id = Number(params.id);
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         price: '',
         stockQuantity: '',
         category: 'SHOES',
-        imageUrl: ''
+        imageUrl: '',
+        status: 'ON_SALE' as ProductStatus
     });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -43,6 +49,38 @@ export default function NewProductPage() {
         { value: 'ELECTRONICS', label: '전자제품' },
         { value: 'OTHER', label: '기타' },
     ];
+
+    const statuses = [
+        { value: 'ON_SALE', label: '판매 중', color: 'emerald' },
+        { value: 'RESERVED', label: '예약 중', color: 'amber' },
+        { value: 'SOLD_OUT', label: '품절', color: 'red' },
+    ];
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                setIsLoading(true);
+                const product = await productService.getProductById(id);
+                setFormData({
+                    name: product.name,
+                    description: product.description || '',
+                    price: product.price.toString(),
+                    stockQuantity: product.stockQuantity?.toString() || '0',
+                    category: product.category || 'OTHER',
+                    imageUrl: product.imageUrl || '',
+                    status: product.status
+                });
+            } catch (error) {
+                console.error('Failed to fetch product:', error);
+                alert('상품 정보를 불러오는데 실패했습니다.');
+                router.push('/seller/products');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (id) fetchProduct();
+    }, [id, router]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -64,18 +102,12 @@ export default function NewProductPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            setIsLoading(true);
+            setIsSaving(true);
 
             let finalImageUrl = formData.imageUrl;
 
-            // If a file is selected, upload it first
             if (selectedFile) {
                 finalImageUrl = await imageService.uploadImage(selectedFile);
-            }
-
-            if (!finalImageUrl) {
-                alert('이미지를 등록해주세요.');
-                return;
             }
 
             const payload = {
@@ -84,17 +116,26 @@ export default function NewProductPage() {
                 price: Number(formData.price),
                 stockQuantity: Number(formData.stockQuantity)
             };
-            await productService.createProduct(payload as any);
-            alert('상품이 성공적으로 등록되었습니다!');
+            await productService.updateProduct(id, payload as any);
+            alert('상품 정보가 수정되었습니다!');
             router.push('/seller/products');
         } catch (error: any) {
-            console.error('Registration failed:', error);
-            const message = error.response?.data?.message || '상품 등록에 실패했습니다.';
+            console.error('Update failed:', error);
+            const message = error.response?.data?.message || '상품 수정에 실패했습니다.';
             alert(message);
         } finally {
-            setIsLoading(false);
+            setIsSaving(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-64 space-y-4">
+                <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
+                <p className="text-sm font-black text-white/20 uppercase tracking-[0.2em]">상품 데이터를 불러오고 있습니다...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -108,62 +149,77 @@ export default function NewProductPage() {
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-bold uppercase tracking-widest">목록으로 돌아가기</span>
                     </button>
-                    <h2 className="text-4xl font-black tracking-tighter text-white">신규 상품 등록</h2>
-                    <p className="text-white/40 font-medium">새로운 상품의 상세 정보와 이미지를 등록하세요.</p>
+                    <h2 className="text-4xl font-black tracking-tighter text-white">상품 정보 수정</h2>
+                    <p className="text-white/40 font-medium">상품의 정보를 수정하고 노출 상태를 관리하세요.</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
-                {/* Left: Image Upload & Preview */}
+                {/* Left: Image & Status */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-[#0f0f12] border border-white/5 rounded-[2.5rem] p-8 space-y-6 sticky top-8">
-                        <div className="space-y-2">
-                            <h3 className="text-lg font-black text-white flex items-center gap-2">
-                                <ImageIcon className="w-5 h-5 text-indigo-400" />
-                                상품 이미지
-                            </h3>
-                            <p className="text-white/30 text-xs font-medium">고해상도 이미지를 사용하면 판매율이 높아집니다.</p>
+                    <div className="bg-[#0f0f12] border border-white/5 rounded-[2.5rem] p-8 space-y-8 sticky top-8">
+                        {/* Status Selection */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-1">판매 상태 설정</h3>
+                            <div className="flex flex-col gap-2">
+                                {statuses.map((s) => (
+                                    <button
+                                        key={s.value}
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, status: s.value as ProductStatus }))}
+                                        className={cn(
+                                            "flex items-center justify-between px-5 py-4 rounded-2xl border transition-all",
+                                            formData.status === s.value
+                                                ? `bg-${s.color}-500/10 border-${s.color}-500/50 text-${s.color}-500 shadow-lg shadow-${s.color}-500/5`
+                                                : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10"
+                                        )}
+                                    >
+                                        <span className="text-sm font-black">{s.label}</span>
+                                        {formData.status === s.value && <CheckCircle2 className="w-4 h-4" />}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
-                        <div
-                            onClick={() => fileInputRef.current?.click()}
-                            className="aspect-square rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-4 group hover:border-indigo-500/30 hover:bg-white/[0.04] transition-all cursor-pointer relative overflow-hidden"
-                        >
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                accept="image/*"
-                                className="hidden"
-                            />
-                            {(previewUrl || formData.imageUrl) ? (
-                                <>
-                                    <img src={previewUrl || formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPreviewUrl('');
-                                            setSelectedFile(null);
-                                            setFormData(prev => ({ ...prev, imageUrl: '' }));
-                                            if (fileInputRef.current) fileInputRef.current.value = '';
-                                        }}
-                                        className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-md rounded-xl text-white hover:bg-red-500 transition-all"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-all">
-                                        <Upload className="w-8 h-8 opacity-30" />
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-xs font-black text-white/60">이미지 업로드</p>
-                                        <p className="text-[10px] text-white/20 mt-1 uppercase tracking-widest">JPG, PNG up to 5MB</p>
-                                    </div>
-                                </>
-                            )}
+                        <div className="pt-8 border-t border-white/5 space-y-4">
+                            <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-1">상품 이미지</h3>
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="aspect-square rounded-[2rem] border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-4 group hover:border-indigo-500/30 hover:bg-white/[0.04] transition-all relative overflow-hidden cursor-pointer"
+                            >
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileChange}
+                                    accept="image/*"
+                                    className="hidden"
+                                />
+                                {(previewUrl || formData.imageUrl) ? (
+                                    <>
+                                        <img src={previewUrl || formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setPreviewUrl('');
+                                                setSelectedFile(null);
+                                                setFormData(prev => ({ ...prev, imageUrl: '' }));
+                                                if (fileInputRef.current) fileInputRef.current.value = '';
+                                            }}
+                                            className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-md rounded-xl text-white hover:bg-red-500 transition-all"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="w-8 h-8 opacity-10" />
+                                        <div className="text-center">
+                                            <p className="text-[10px] font-black text-white/40">클릭하여 이미지 업로드</p>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
 
                         <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
@@ -179,16 +235,15 @@ export default function NewProductPage() {
                     </div>
                 </div>
 
-                {/* Right: Product Details Form */}
+                {/* Right: Details Form */}
                 <div className="lg:col-span-2 space-y-8">
                     <div className="bg-[#0f0f12] border border-white/5 rounded-[3rem] p-10 space-y-10 shadow-2xl">
-                        {/* Section: Basic Info */}
                         <div className="space-y-8">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-indigo-500/10 rounded-xl">
                                     <FileText className="w-5 h-5 text-indigo-400" />
                                 </div>
-                                <h3 className="text-xl font-black text-white">기본 정보</h3>
+                                <h3 className="text-xl font-black text-white">상세 정보 수정</h3>
                             </div>
 
                             <div className="space-y-6">
@@ -197,20 +252,18 @@ export default function NewProductPage() {
                                     <input
                                         type="text"
                                         required
-                                        placeholder="상세한 상품명을 입력하세요 (예: DIBS! 한정판 블랙 스니커즈)"
-                                        className="w-full px-6 py-5 bg-white/5 border border-white/5 rounded-2xl text-white font-bold placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 transition-all"
+                                        className="w-full px-6 py-5 bg-white/5 border border-white/5 rounded-2xl text-white font-bold focus:outline-none focus:border-indigo-500/50 transition-all"
                                         value={formData.name}
                                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                     />
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">상품 설명</label>
+                                    <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">상세 설명</label>
                                     <textarea
                                         required
                                         rows={6}
-                                        placeholder="상품의 특징, 소재, 사이즈 정보 등을 자세히 적어주세요."
-                                        className="w-full px-6 py-5 bg-white/5 border border-white/5 rounded-3xl text-white font-medium placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 transition-all resize-none leading-relaxed text-sm"
+                                        className="w-full px-6 py-5 bg-white/5 border border-white/5 rounded-3xl text-white font-medium focus:outline-none focus:border-indigo-500/50 transition-all resize-none leading-relaxed text-sm"
                                         value={formData.description}
                                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                     />
@@ -218,15 +271,7 @@ export default function NewProductPage() {
                             </div>
                         </div>
 
-                        {/* Section: Pricing & Category */}
                         <div className="space-y-8 pt-10 border-t border-white/5">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-emerald-500/10 rounded-xl">
-                                    <Layers className="w-5 h-5 text-emerald-400" />
-                                </div>
-                                <h3 className="text-xl font-black text-white">가격 및 재고 정보</h3>
-                            </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">판매가 (₩)</label>
@@ -235,8 +280,7 @@ export default function NewProductPage() {
                                         <input
                                             type="number"
                                             required
-                                            placeholder="0"
-                                            className="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/5 rounded-2xl text-white font-black placeholder:text-white/20 focus:outline-none focus:border-emerald-500/30 transition-all font-mono"
+                                            className="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/5 rounded-2xl text-white font-black focus:outline-none focus:border-indigo-500/30 transition-all font-mono"
                                             value={formData.price}
                                             onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                                         />
@@ -250,8 +294,7 @@ export default function NewProductPage() {
                                         <input
                                             type="number"
                                             required
-                                            placeholder="0"
-                                            className="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/5 rounded-2xl text-white font-black placeholder:text-white/20 focus:outline-none focus:border-indigo-500/30 transition-all font-mono"
+                                            className="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/5 rounded-2xl text-white font-black focus:outline-none focus:border-indigo-500/30 transition-all font-mono"
                                             value={formData.stockQuantity}
                                             onChange={(e) => setFormData(prev => ({ ...prev, stockQuantity: e.target.value }))}
                                         />
@@ -269,7 +312,7 @@ export default function NewProductPage() {
                                                 className={cn(
                                                     "px-2 py-4 rounded-xl text-[10px] font-black uppercase tracking-tighter border transition-all",
                                                     formData.category === cat.value
-                                                        ? "bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20 scale-[1.02]"
+                                                        ? "bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20"
                                                         : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white"
                                                 )}
                                             >
@@ -281,29 +324,19 @@ export default function NewProductPage() {
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="pt-10 flex items-center gap-4">
                             <button
                                 type="submit"
-                                disabled={isLoading}
+                                disabled={isSaving}
                                 className="flex-1 py-5 bg-indigo-500 text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-70"
                             >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="w-6 h-6 animate-spin" />
-                                        처리 중...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-6 h-6" />
-                                        상품 등록하기
-                                    </>
-                                )}
+                                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
+                                정보 수정하기
                             </button>
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="px-10 py-5 bg-white/5 border border-white/5 rounded-[2rem] font-bold text-white/40 hover:bg-white/10 hover:text-white transition-all"
+                                className="px-10 py-5 bg-white/5 border border-white/5 rounded-[2rem] font-bold text-white/40 hover:bg-white/10 transition-all"
                             >
                                 취소
                             </button>

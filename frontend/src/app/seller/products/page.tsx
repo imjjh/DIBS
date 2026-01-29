@@ -18,36 +18,46 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from '@/lib/axios';
-import { Product, ApiResponse } from '@/types';
+import { Product, ProductListResponse } from '@/types';
 import { useAuthStore } from '@/store/useAuthStore';
+import { productService } from '@/services/productService';
+import { useRouter } from 'next/navigation';
 
 export default function SellerProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { user } = useAuthStore();
+    const router = useRouter();
+
+    const fetchMyProducts = async () => {
+        try {
+            setIsLoading(true);
+            // Fetch products - filtering by seller locally as standard API doesn't have seller-specific endpoint yet
+            const response = await productService.getProducts({ size: 100 });
+            const myItems = response.items.filter(p => p.sellerId === user?.id);
+            setProducts(myItems);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchMyProducts = async () => {
-            try {
-                setIsLoading(true);
-                // Temporary: fetch all and filter by current user if sellerId exists
-                // In real world, this would be GET /api/seller/products
-                const response = await axios.get<ApiResponse<ProductListResponse>>('/products');
-                const pagedResponse = response.data.data;
-                const allItems = pagedResponse.items;
-
-                // Filtering locally for demo since we haven't touched backend
-                const myItems = allItems.filter(p => p.sellerId === user?.id);
-                setProducts(myItems);
-            } catch (error) {
-                console.error('Failed to fetch products:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         if (user) fetchMyProducts();
     }, [user]);
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('정말로 이 상품을 삭제하시겠습니까?')) return;
+        try {
+            await productService.deleteProduct(id);
+            alert('상품이 삭제되었습니다.');
+            fetchMyProducts();
+        } catch (error: any) {
+            console.error('Delete failed:', error);
+            alert(error.response?.data?.message || '상품 삭제에 실패했습니다.');
+        }
+    };
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -170,15 +180,24 @@ export default function SellerProductsPage() {
                                         </td>
                                         <td className="bg-white/[0.02] rounded-r-3xl px-6 py-5 border-y border-r border-white/5 group-hover/row:bg-white/[0.04] transition-all text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                                                <button className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/10 transition-all text-white/60 hover:text-white">
+                                                <button
+                                                    onClick={() => router.push(`/seller/products/${product.id}/edit`)}
+                                                    className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/10 transition-all text-white/60 hover:text-white"
+                                                >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
-                                                <button className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500 hover:border-red-500 transition-all text-red-500 hover:text-white">
+                                                <button
+                                                    onClick={() => handleDelete(product.id)}
+                                                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500 hover:border-red-500 transition-all text-red-500 hover:text-white"
+                                                >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
-                                                <button className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-all text-white/20 hover:text-white">
-                                                    <MoreVertical className="w-4 h-4" />
-                                                </button>
+                                                <Link
+                                                    href={`/store/${product.id}`}
+                                                    className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-all text-white/20 hover:text-white"
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </Link>
                                             </div>
                                         </td>
                                     </tr>

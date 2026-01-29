@@ -20,4 +20,9 @@ export const productService = {
         const response = await api.get<ApiResponse<ProductDetail>>(`/products/${id}`);
         return response.data.data;
     },
+
+    updateProduct: async (id: number, productData: Partial<Product>): Promise<Product> => {
+        const response = await api.patch<ApiResponse<Product>>(`/products/${id}`, productData);
+        return response.data.data;
+    },
 };

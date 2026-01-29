@@ -32,7 +32,8 @@ export const useAuthStore = create<AuthState>()(
                     let errorMessage = '로그인에 실패했습니다.';
                     if (error.response) {
                         // 백엔드에서 보낸 ApiResponse의 message 사용
-                        errorMessage = error.response.data?.message || errorMessage;
+                        const data = error.response.data;
+                        errorMessage = (typeof data === 'object' && data?.message) ? data.message : errorMessage;
                     } else if (error.request) {
                         errorMessage = '서버와 연결할 수 없습니다. 서버 상태를 확인해주세요.';
                     }
@@ -49,7 +50,10 @@ export const useAuthStore = create<AuthState>()(
                 } catch (error: any) {
                     let errorMessage = '회원가입에 실패했습니다.';
                     if (error.response) {
-                        errorMessage = error.response.data?.message || errorMessage;
+                        // 백엔드에서 보낸 ApiResponse의 message 사용
+                        // 데이터가 객체가 아닐 경우(500 에러 페이지 등) 대비
+                        const data = error.response.data;
+                        errorMessage = (typeof data === 'object' && data?.message) ? data.message : errorMessage;
                     } else if (error.request) {
                         errorMessage = '서버와 연결할 수 없습니다. 서버 상태를 확인해주세요.';
                     }

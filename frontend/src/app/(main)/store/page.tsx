@@ -34,6 +34,7 @@ export default function StorePage() {
     const [mounted, setMounted] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [totalElements, setTotalElements] = useState(0);
 
     // Debounce search query
     useEffect(() => {
@@ -60,6 +61,7 @@ export default function StorePage() {
 
             if (response && response.items) {
                 setProducts(response.items);
+                setTotalElements(response.totalElements);
                 setHasMore(response.items.length >= 12);
             }
         } catch (error) {
@@ -109,10 +111,10 @@ export default function StorePage() {
                     <div className="max-w-3xl space-y-4">
                         <div className="flex items-center gap-2 mb-4">
                             <span className="w-12 h-1 bg-primary rounded-full" />
-                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Official Store</span>
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">공식 스토어</span>
                         </div>
                         <h1 className="text-6xl font-black tracking-tighter leading-none mb-6">
-                            Grab Your <span className="text-primary italic">Best</span> Deal
+                            최고의 <span className="text-primary italic">선택</span>, 최상의 브랜드
                         </h1>
                         <p className="text-muted-foreground text-lg font-medium max-w-xl opacity-80 leading-relaxed">
                             DIBS!가 엄선한 선착순 리미티드 아이템부터 <br />트렌디한 프리미엄 브랜드까지 한 곳에서 만나보세요.
@@ -163,7 +165,7 @@ export default function StorePage() {
                     <aside className="lg:col-span-2 space-y-8">
                         <div>
                             <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                <TrendingUp className="w-3 h-3" /> Categories
+                                <TrendingUp className="w-3 h-3" /> 카테고리
                             </h3>
                             <div className="flex flex-col gap-2">
                                 {CATEGORIES.map((cat) => (
@@ -189,9 +191,9 @@ export default function StorePage() {
                                 <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500">
                                     <Flame className="w-4 h-4" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Trending</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">트렌딩</span>
                             </div>
-                            <p className="text-sm font-bold leading-tight">지금 12,491명이<br />디입스 중!</p>
+                            <p className="text-sm font-bold leading-tight">많은 사람들이<br />디입스 중!</p>
                         </div>
                     </aside>
 
@@ -202,7 +204,7 @@ export default function StorePage() {
                                 <span className="text-sm font-black text-foreground">인기 상품 순</span>
                                 <ChevronDown className="w-4 h-4 opacity-30" />
                             </div>
-                            <p className="text-xs font-bold text-muted-foreground">함께 찾은 아이템: <span className="text-foreground">240개</span></p>
+                            <p className="text-xs font-bold text-muted-foreground">함께 찾은 아이템: <span className="text-foreground">{totalElements}개</span></p>
                         </div>
 
                         <div className={cn(
@@ -242,7 +244,7 @@ export default function StorePage() {
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
                                                 <button className="px-8 py-3 bg-white text-black font-black rounded-2xl shadow-2xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                                                     <ShoppingCart className="w-4 h-4" />
-                                                    Quick Shop
+                                                    바로 구매
                                                 </button>
                                             </div>
                                         </div>
