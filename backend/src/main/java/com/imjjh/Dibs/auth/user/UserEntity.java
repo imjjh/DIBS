@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -113,4 +114,12 @@ public class UserEntity extends BaseEntity {
         this.email = email;
         this.password = password;
     }
+
+    @Override
+    public void delete() {
+        super.delete();
+        this.username = username + "_del_" + UUID.randomUUID().toString().substring(0, 8);
+        this.email = email + "_del_" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
 }
