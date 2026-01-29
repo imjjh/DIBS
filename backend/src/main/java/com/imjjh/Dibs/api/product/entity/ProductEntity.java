@@ -35,15 +35,15 @@ public class ProductEntity extends BaseEntity {
     @Setter
     private String description;
 
-    @Column
+    @Column(nullable = false)
     @Setter
     private Long price;
 
-    @Column
+    @Column(nullable = false)
     @Setter
     private Integer stockQuantity;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Schema(description = "물건의 현재 상태 (ON_SALE, SOLD_OUT)")
     @Setter
@@ -54,7 +54,7 @@ public class ProductEntity extends BaseEntity {
     @Schema(description = "S3 또는 외부 이미지 링크")
     private String imageUrl;
 
-    @Column
+    @Column(nullable = false)
     @Setter
     @Schema(description = "신발, 의류 등")
     private String category;
@@ -84,5 +84,11 @@ public class ProductEntity extends BaseEntity {
         this.specialPrice = 0L;
         this.discountRate = 0;
         this.status = StatusType.PREPARING;
+    }
+
+    @Override
+    public void delete() {
+        super.delete();
+        this.imageUrl = null;
     }
 }

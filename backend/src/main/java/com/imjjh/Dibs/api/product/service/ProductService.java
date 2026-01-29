@@ -15,6 +15,7 @@ import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.Dibs.common.dto.PagedResponse;
 import com.imjjh.Dibs.common.exception.BusinessException;
+import com.imjjh.Dibs.common.service.S3Service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ProductMapper productMapper;
+    private final S3Service s3Service;
 
     /**
      * 상품 목록 검색
@@ -58,6 +60,7 @@ public class ProductService {
 
     /**
      * 상품 등록
+     * S3에 이미지 업로드 후 호출, DTO안의 url을 DB 받아 저장
      * 
      * @param userDetails
      * @param requestDto
@@ -77,7 +80,8 @@ public class ProductService {
     }
 
     /**
-     * 상품 수정
+     * 상품 수정 & s3 이미지 url 제거
+     * TODO: 상품 이미지를 여러개 업로드 가능하게
      * 
      * @param userDetails
      * @param id
@@ -91,14 +95,22 @@ public class ProductService {
         ProductEntity productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-        // TODO 권한 검사
+        // TODO: 권한 검사
 
+        // 상품 업데이트
+        String oldUrl = productEntity.getImageUrl();
         productMapper.updateFromDto(requestDto, productEntity);
+
+        // S3에서 예전 이미지 제거
+        if (requestDto.imageUrl() != null && !requestDto.imageUrl().equals(oldUrl)) {
+            s3Service.deleteImageFile(oldUrl);
+        }
+
         return productMapper.toDetailDto(productEntity);
     }
 
     /**
-     * soft delete & S3에 저장된 사진을 지우지 않습니다.
+     * soft delete & S3에서 이미지 제거
      * 
      * @param userDetails
      * @param id
@@ -110,8 +122,8 @@ public class ProductService {
 
         // TODO: 권한 검사
 
-        productRepository.delete(productEntity);
-
+        s3Service.deleteImageFile(productEntity.getImageUrl());
+        productEntity.delete();
     }
 
     public void buyProduct(CustomUserDetails userDetails, Long id) {
