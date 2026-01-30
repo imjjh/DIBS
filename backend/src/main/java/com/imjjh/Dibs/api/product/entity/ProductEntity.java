@@ -2,6 +2,7 @@ package com.imjjh.Dibs.api.product.entity;
 
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.BaseEntity;
+import com.imjjh.Dibs.common.Ownable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -17,7 +18,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @SQLDelete(sql = "UPDATE product_entity SET deleted_at = now() where id = ?")
 @SQLRestriction("deleted_at IS NULL")
-public class ProductEntity extends BaseEntity {
+public class ProductEntity extends BaseEntity implements Ownable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,9 +44,9 @@ public class ProductEntity extends BaseEntity {
     @Setter
     private Integer stockQuantity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     @Enumerated(EnumType.STRING)
-    @Schema(description = "물건의 현재 상태 (ON_SALE, SOLD_OUT)")
+    @Schema(description = "물건의 현재 상태 (ON_SALE, SOLD_OUT 등)")
     @Setter
     private StatusType status;
 
@@ -90,5 +91,10 @@ public class ProductEntity extends BaseEntity {
     public void delete() {
         super.delete();
         this.imageUrl = null;
+    }
+
+    @Override
+    public Long getOwnerId() {
+        return this.seller.getId();
     }
 }

@@ -41,6 +41,7 @@ public class SellerApplicationEntity extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Schema(description = "신청 처리 상태")
+    @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     private ApplicationStatus applicationStatus = ApplicationStatus.PENDING; // 기본값 설정
 
     @Schema(nullable = true, description = "거절 시 사유")
