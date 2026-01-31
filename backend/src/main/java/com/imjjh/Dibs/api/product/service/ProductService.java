@@ -95,7 +95,8 @@ public class ProductService {
         ProductEntity productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-        // TODO: 권한 검사
+        // 권한 검사
+        productEntity.validateOwner(userDetails);
 
         // 상품 업데이트
         String oldUrl = productEntity.getImageUrl();
@@ -120,10 +121,19 @@ public class ProductService {
         ProductEntity productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-        // TODO: 권한 검사
+        // 권한 검사
+        productEntity.validateOwner(userDetails);
 
-        s3Service.deleteImageFile(productEntity.getImageUrl());
+
+        // S3 삭제를 위한 URL
+        String urlToDelete = productEntity.getImageUrl();
+
+        // 엔티티 삭제
         productEntity.delete();
+
+        // S3에서 이미지 삭제
+        s3Service.deleteImageFile(productEntity.getImageUrl());
+
     }
 
     public void buyProduct(CustomUserDetails userDetails, Long id) {
