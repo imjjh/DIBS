@@ -8,10 +8,10 @@ import com.imjjh.Dibs.auth.token.repository.RefreshTokenRepository;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.dto.ApiResponse;
+import com.imjjh.Dibs.common.util.AuthCookieProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +32,7 @@ public class AuthController {
         private final JwtTokenProvider jwtTokenProvider;
         private final RefreshTokenRepository refreshTokenRepository;
         private final AuthService authService;
+        private final AuthCookieProvider authCookieProvider;
 
         @Operation(summary = "아이디 중복 확인", description = "입력한 아이디가 이미 존재하는지 확인합니다.")
         @PostMapping("/validateUsername")
@@ -65,24 +66,10 @@ public class AuthController {
                         @Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse response) {
                 LoginResponseDto responseDto = authService.login(requestDto);
 
-                ResponseCookie accessCookie = ResponseCookie.from("accessToken", responseDto.accessToken())
-                                .httpOnly(true)
-                                .secure(true)
-                                .path("/")
-                                .maxAge(jwtTokenProvider.getAccessTokenValiditySeconds())
-                                .sameSite("Lax")
-                                .build();
-
-                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", responseDto.refreshToken())
-                                .httpOnly(true)
-                                .secure(true)
-                                .path("/")
-                                .maxAge(jwtTokenProvider.getRefreshTokenValiditySeconds())
-                                .sameSite("Lax")
-                                .build();
-
-                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE,
+                                authCookieProvider.createAccessTokenCookie(responseDto.accessToken()).toString());
+                response.addHeader(HttpHeaders.SET_COOKIE,
+                                authCookieProvider.createRefreshTokenCookie(responseDto.refreshToken()).toString());
 
                 return ApiResponse.success(CurrentUserResponseDto.of(responseDto.user()));
         }
@@ -114,26 +101,10 @@ public class AuthController {
                         refreshTokenRepository.deleteById(userDetails.getName());
                 }
 
-                // AccessToken 쿠키 삭제
-                ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
-                                .path("/")
-                                .maxAge(0)
-                                .sameSite("Lax")
-                                .secure(true)
-                                .httpOnly(true)
-                                .build();
-
-                // RefreshToken 쿠키 삭제
-                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
-                                .path("/")
-                                .maxAge(0)
-                                .sameSite("Lax")
-                                .secure(true)
-                                .httpOnly(true)
-                                .build();
-
-                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE,
+                                authCookieProvider.createDeleteCookie("accessToken").toString());
+                response.addHeader(HttpHeaders.SET_COOKIE,
+                                authCookieProvider.createDeleteCookie("refreshToken").toString());
 
                 return ApiResponse.success();
         }
@@ -169,28 +140,14 @@ public class AuthController {
                 String newRefreshToken = jwtTokenProvider.createRefreshToken(auth);
 
                 // refreshToken 덮어쓰기
-                RefreshToken newRedisToken = new RefreshToken(userId, newRefreshToken, jwtTokenProvider.getRefreshTokenValiditySeconds());
+                RefreshToken newRedisToken = new RefreshToken(userId, newRefreshToken,
+                                jwtTokenProvider.getRefreshTokenValiditySeconds());
                 refreshTokenRepository.save(newRedisToken);
 
-
-                ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-                                .httpOnly(true)
-                                .secure(true)
-                                .path("/")
-                                .maxAge(jwtTokenProvider.getAccessTokenValiditySeconds())
-                                .sameSite("Lax")
-                                .build();
-
-                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
-                        .httpOnly(true)
-                        .secure(true)
-                        .path("/")
-                        .maxAge(jwtTokenProvider.getRefreshTokenValiditySeconds())
-                        .sameSite("Lax")
-                        .build();
-
-                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE,
+                                authCookieProvider.createAccessTokenCookie(newAccessToken).toString());
+                response.addHeader(HttpHeaders.SET_COOKIE,
+                                authCookieProvider.createRefreshTokenCookie(newRefreshToken).toString());
                 return ApiResponse.success();
         }
 }
