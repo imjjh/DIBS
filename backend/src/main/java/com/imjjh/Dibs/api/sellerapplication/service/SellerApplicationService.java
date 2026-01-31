@@ -69,7 +69,7 @@ public class SellerApplicationService {
      */
     @Transactional(readOnly = true)
     public SellerApplicationResponseDto getSellerApplication(CustomUserDetails userDetails) {
-        Long userId = Long.valueOf(userDetails.getName());
+        Long userId = userDetails.getNameLong();
 
         SellerApplicationEntity sellerApplicationEntity = sellerApplicationRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(SellerErrorCode.APPLICATION_NOT_FOUND));

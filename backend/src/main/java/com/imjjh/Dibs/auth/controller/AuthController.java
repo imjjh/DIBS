@@ -69,7 +69,7 @@ public class AuthController {
                                 .httpOnly(true)
                                 .secure(true)
                                 .path("/")
-                                .maxAge(60 * 60)
+                                .maxAge(jwtTokenProvider.getAccessTokenValiditySeconds())
                                 .sameSite("Lax")
                                 .build();
 
@@ -77,7 +77,7 @@ public class AuthController {
                                 .httpOnly(true)
                                 .secure(true)
                                 .path("/")
-                                .maxAge(60 * 60)
+                                .maxAge(jwtTokenProvider.getRefreshTokenValiditySeconds())
                                 .sameSite("Lax")
                                 .build();
 
@@ -141,17 +141,15 @@ public class AuthController {
         @Operation(summary = "토큰 재발급", description = "RefreshToken을 통해 새로운 AccessToken을 발급받습니다.")
         @PostMapping("/refresh")
         @ResponseStatus(HttpStatus.OK)
-        public ApiResponse<Void> refresh(
-                        @CookieValue(name = "refreshToken", required = false) String refreshToken,
+        public ApiResponse<Void> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken,
                         HttpServletResponse response) {
 
                 if (refreshToken == null) {
                         throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
                 }
 
-                if (!jwtTokenProvider.validateToken(refreshToken)) {
-                        throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
-                }
+                // TODO: refreshToken 재사용 감지 로직
+                jwtTokenProvider.validateToken(refreshToken);
 
                 // Redis에 저장된 토큰인지 확인
                 Authentication auth = jwtTokenProvider.getAuthentication(refreshToken);
@@ -162,21 +160,37 @@ public class AuthController {
                 RefreshToken redisToken = refreshTokenRepository.findById(userId)
                                 .orElse(null);
 
+                // refresh 토큰 검사
                 if (redisToken == null || !redisToken.getToken().equals(refreshToken)) {
                         throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
                 }
 
                 String newAccessToken = jwtTokenProvider.createAccessToken(auth);
+                String newRefreshToken = jwtTokenProvider.createRefreshToken(auth);
+
+                // refreshToken 덮어쓰기
+                RefreshToken newRedisToken = new RefreshToken(userId, newRefreshToken, jwtTokenProvider.getRefreshTokenValiditySeconds());
+                refreshTokenRepository.save(newRedisToken);
+
 
                 ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
                                 .httpOnly(true)
                                 .secure(true)
                                 .path("/")
-                                .maxAge(60 * 60)
+                                .maxAge(jwtTokenProvider.getAccessTokenValiditySeconds())
                                 .sameSite("Lax")
                                 .build();
 
+                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                        .httpOnly(true)
+                        .secure(true)
+                        .path("/")
+                        .maxAge(jwtTokenProvider.getRefreshTokenValiditySeconds())
+                        .sameSite("Lax")
+                        .build();
+
                 response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
                 return ApiResponse.success();
         }
 }

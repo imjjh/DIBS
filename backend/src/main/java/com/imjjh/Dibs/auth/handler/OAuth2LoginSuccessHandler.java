@@ -42,7 +42,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String userId = userDetails.getName();
 
         // refreshToken redis에 저장
-        RefreshToken redisToken = new RefreshToken(userId, refreshToken);
+        RefreshToken redisToken = new RefreshToken(userId, refreshToken,jwtTokenProvider.getRefreshTokenValiditySeconds());
         refreshTokenRepository.save(redisToken);
         log.info("Refresh Token Redis 저장 완료: {}",userId);
 
@@ -53,19 +53,18 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .secure(true)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(60 * 60)
+                .maxAge(jwtTokenProvider.getAccessTokenValiditySeconds())
                 .build();
 
+        // 쿠키 생성 refreshToken
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(60 * 60 * 24 * 7)
+                .maxAge(jwtTokenProvider.getAccessTokenValiditySeconds())
                 .build();
 
-
-        // TODO: CSRF 방어 로직
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 

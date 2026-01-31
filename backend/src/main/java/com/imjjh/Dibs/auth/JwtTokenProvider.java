@@ -1,12 +1,16 @@
 package com.imjjh.Dibs.auth;
 
+import com.imjjh.Dibs.auth.exception.AuthErrorCode;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
+import com.imjjh.Dibs.common.exception.BusinessException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,8 +24,8 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
     private final Key key;
-    private final long tokenValidityInMilliseconds;
     private final UserRepository userRepository;
+    private final long tokenValidityInMilliseconds;
     private final long refreshTokenValidityInMilliseconds;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret,
@@ -36,6 +40,15 @@ public class JwtTokenProvider {
         this.refreshTokenValidityInMilliseconds = refreshTokenValidityInMilliseconds;
         this.userRepository = userRepository;
     }
+
+    public Long getAccessTokenValiditySeconds() {
+        return tokenValidityInMilliseconds/1000;
+    }
+
+    public Long getRefreshTokenValiditySeconds() {
+        return refreshTokenValidityInMilliseconds/1000;
+    }
+
 
     /**
      * JWT(AccessToken) 토큰을 생성합니다.
@@ -108,10 +121,10 @@ public class JwtTokenProvider {
      * @param token
      * @return
      */
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
+            return;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
@@ -121,7 +134,7 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
         }
-        return false;
+        throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
     }
 
     /**

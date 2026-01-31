@@ -10,12 +10,14 @@ import org.springframework.data.redis.core.TimeToLive;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@RedisHash(value = "refreshToken",timeToLive = 60*60*24*7)
+@RedisHash(value = "refreshToken")
 public class RefreshToken {
 
+    // redis는 @Id가 이미 존재하는 경우 덮어쓰고, 없는 경우 생성
     @Id
     private String userId; // key
-
     private String token; // value;
 
+    @TimeToLive
+    private Long expiration;
 }
