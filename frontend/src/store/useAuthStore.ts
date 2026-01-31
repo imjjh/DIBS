@@ -12,16 +12,19 @@ interface AuthState {
     signup: (credentials: SignupCredentials) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
-    becomeSeller: () => void; // Mock function for UI demo
+    becomeSeller: () => void;
+    isHydrated: boolean;
+    setHydrated: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             user: null,
             isAuthenticated: false,
             isLoading: false,
             error: null,
+            isHydrated: false,
 
             login: async (credentials) => {
                 set({ isLoading: true, error: null });
@@ -72,9 +75,10 @@ export const useAuthStore = create<AuthState>()(
             },
 
             checkAuth: async () => {
-                // 토큰 존재 여부를 로컬스토리지에서 확인하지 않고
-                // 바로 API 호출하여 쿠키 유효성 검증
-                set({ isLoading: true });
+                // 이미 인증된 상태라면 isLoading을 true로 하지 않음 (새로고침 시 깜빡임 방지)
+                if (!get().isAuthenticated) {
+                    set({ isLoading: true });
+                }
                 try {
                     const user = await authService.getMe();
                     console.log("checkAuth: Success", user);
@@ -97,9 +101,14 @@ export const useAuthStore = create<AuthState>()(
                     return state;
                 });
             },
+
+            setHydrated: () => set({ isHydrated: true }),
         }),
         {
             name: 'auth-storage',
+            onRehydrateStorage: () => (state) => {
+                state?.setHydrated();
+            },
             partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
         }
     )

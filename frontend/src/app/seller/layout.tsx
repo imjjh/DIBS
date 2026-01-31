@@ -13,25 +13,33 @@ export default function SellerLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { user, isAuthenticated, isLoading, checkAuth } = useAuthStore();
+    const { user, isAuthenticated, isLoading, isHydrated, checkAuth } = useAuthStore();
     const router = useRouter();
     const pathname = usePathname();
 
     useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
+        if (isHydrated) {
+            checkAuth();
+        }
+    }, [checkAuth, isHydrated]);
 
     useEffect(() => {
-        if (!isLoading) {
+        // 하이드레이션과 초기 권한 체크가 모두 끝난 후 실행
+        if (isHydrated && !isLoading) {
             if (!isAuthenticated) {
                 router.push('/login');
             } else if (!user?.roles?.includes('ROLE_SELLER')) {
                 router.push('/');
             }
         }
-    }, [isAuthenticated, user, isLoading, router]);
+    }, [isAuthenticated, user, isLoading, isHydrated, router]);
 
-    if (isLoading) {
+    // 하이드레이션 전에는 아무것도 안 보여줌 (깜빡임 방지 핵심)
+    if (!isHydrated) {
+        return null;
+    }
+
+    if (isLoading && !isAuthenticated) {
         return <div className="flex items-center justify-center h-screen bg-slate-950 text-white font-black">DIBS! SELLER LOADING...</div>;
     }
 
