@@ -12,4 +12,17 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> of(String message, T data) {
         return new ApiResponse<>(message, data);
     }
+
+    public static <T> ApiResponse<T> of(String message) {
+        return new ApiResponse<>(message, null);
+    }
+
+    public static <T> ApiResponse<T> success() {
+        return new ApiResponse<>(ValidationMessage.SUCCESS, null);
+    }
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(ValidationMessage.SUCCESS, data);
+    }
+
 }

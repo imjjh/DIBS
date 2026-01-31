@@ -10,16 +10,15 @@ import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import com.imjjh.Dibs.common.dto.ValidationMessage;
+import jakarta.servlet.http.HttpServletResponse;
 import com.imjjh.Dibs.auth.exception.AuthErrorCode;
 import com.imjjh.Dibs.common.exception.BusinessException;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -31,30 +30,31 @@ public class AuthController {
         private final AuthService authService;
 
         @PostMapping("/validateUsername")
-        public ResponseEntity<ApiResponse<Void>> validateUsername(
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<Void> validateUsername(
                         @Valid @RequestBody ValidUsernameRequestDto requestDto) {
                 authService.validateUsername(requestDto.username());
-                return ResponseEntity.status(HttpStatus.OK)
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS, null));
+                return ApiResponse.success();
         }
 
         @PostMapping("/validateEmail")
-        public ResponseEntity<ApiResponse<Void>> validateEmail(@Valid @RequestBody ValidEmailRequestDto requestDto) {
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<Void> validateEmail(@Valid @RequestBody ValidEmailRequestDto requestDto) {
                 authService.validateEmail(requestDto.email());
-                return ResponseEntity.status(HttpStatus.OK)
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS, null));
+                return ApiResponse.success();
         }
 
         @PostMapping("/register")
-        public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequestDto requestDto) {
+        @ResponseStatus(HttpStatus.CREATED)
+        public ApiResponse<Void> register(@Valid @RequestBody RegisterRequestDto requestDto) {
                 authService.register(requestDto);
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS, null));
+                return ApiResponse.success();
         }
 
         @PostMapping("/login")
-        public ResponseEntity<ApiResponse<CurrentUserResponseDto>> login(
-                        @Valid @RequestBody LoginRequestDto requestDto) {
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<CurrentUserResponseDto> login(
+                        @Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse response) {
                 LoginResponseDto responseDto = authService.login(requestDto);
 
                 ResponseCookie accessCookie = ResponseCookie.from("accessToken", responseDto.accessToken())
@@ -73,11 +73,10 @@ public class AuthController {
                                 .sameSite("Lax")
                                 .build();
 
-                return ResponseEntity.status(HttpStatus.OK)
-                                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS,
-                                                CurrentUserResponseDto.of(responseDto.user())));
+                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+                return ApiResponse.success(CurrentUserResponseDto.of(responseDto.user()));
         }
 
         /**
@@ -87,7 +86,8 @@ public class AuthController {
          * @return 로그인 ? 유저 정보 : null
          */
         @GetMapping("/me")
-        public ResponseEntity<ApiResponse<CurrentUserResponseDto>> getCurrentUser(
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<CurrentUserResponseDto> getCurrentUser(
                         @AuthenticationPrincipal CustomUserDetails userDetails) {
 
                 // 비로그인 상태에서도 "/me" 호출 가능
@@ -97,9 +97,7 @@ public class AuthController {
 
                 UserEntity userEntity = userDetails.getUserEntity();
 
-                return ResponseEntity.status(HttpStatus.OK)
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS,
-                                                CurrentUserResponseDto.of(userEntity)));
+                return ApiResponse.success(CurrentUserResponseDto.of(userEntity));
         }
 
         /**
@@ -110,23 +108,44 @@ public class AuthController {
          * @return
          */
         @PostMapping("/logout")
-        public ResponseEntity<ApiResponse<Void>> logout() {
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
+                        HttpServletResponse response) {
 
-                ResponseCookie cookie = ResponseCookie.from("accessToken", "")
+                // Redis에서 RefreshToken 삭제
+                if (userDetails != null) {
+                        refreshTokenRepository.deleteById(userDetails.getName());
+                }
+
+                // AccessToken 쿠키 삭제
+                ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
                                 .path("/")
                                 .maxAge(0)
                                 .sameSite("Lax")
-                                .secure(false) // Local HTTP 환경을 위해 false로 설정
+                                .secure(true)
                                 .httpOnly(true)
                                 .build();
 
-                return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, cookie.toString())
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS, null));
+                // RefreshToken 쿠키 삭제
+                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                                .path("/")
+                                .maxAge(0)
+                                .sameSite("Lax")
+                                .secure(true)
+                                .httpOnly(true)
+                                .build();
+
+                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+                return ApiResponse.success();
         }
 
         @PostMapping("/refresh")
-        public ResponseEntity<ApiResponse<Void>> refresh(
-                        @CookieValue(name = "refreshToken", required = false) String refreshToken) {
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<Void> refresh(
+                        @CookieValue(name = "refreshToken", required = false) String refreshToken,
+                        HttpServletResponse response) {
 
                 if (refreshToken == null) {
                         throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
@@ -159,8 +178,7 @@ public class AuthController {
                                 .sameSite("Lax")
                                 .build();
 
-                return ResponseEntity.status(HttpStatus.OK)
-                                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                                .body(ApiResponse.of(ValidationMessage.SUCCESS, null));
+                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                return ApiResponse.success();
         }
 }
