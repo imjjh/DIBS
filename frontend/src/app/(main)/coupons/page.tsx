@@ -9,7 +9,6 @@ import {
     Gift,
     Sparkles,
     ChevronRight,
-    Search,
     Clock,
     CheckCircle2
 } from 'lucide-react';
@@ -81,53 +80,44 @@ export default function CouponsPage() {
 
     return (
         <div className="min-h-screen bg-background pb-32">
-            {/* Header / Search Section */}
-            <div className="pt-32 pb-20 bg-secondary/20 border-b border-border relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-20 opacity-[0.03] rotate-12">
-                    <Ticket className="w-96 h-96" />
+            {/* Header Section */}
+            <div className="pt-24 pb-12 bg-secondary/10 border-b border-border relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-12 opacity-[0.02] rotate-12">
+                    <Ticket className="w-64 h-64" />
                 </div>
                 <div className="container mx-auto px-4 relative z-10">
-                    <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-6">
-                        <div className="flex items-center gap-3 px-6 py-2 bg-primary/10 border border-primary/20 rounded-full">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                            <span className="text-xs font-black text-primary uppercase tracking-[0.2em]">Benefit Zone</span>
+                    <div className="flex flex-col items-center text-center max-w-2xl mx-auto space-y-4">
+                        <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+                            <Sparkles className="w-3.5 h-3.5 text-primary" />
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Benefit Zone</span>
                         </div>
-                        <h1 className="text-7xl font-black tracking-tighter leading-none">
+                        <h1 className="text-5xl font-black tracking-tighter leading-none">
                             COUPON <span className="text-primary">ISLAND</span>
                         </h1>
-                        <p className="text-xl font-medium text-muted-foreground opacity-70 leading-relaxed">
-                            쇼핑의 즐거움을 더하는 마법 같은 혜택. <br />지금 가장 필요한 쿠폰을 다운로드하고 최적의 가격으로 구매하세요.
+                        <p className="text-base font-medium text-muted-foreground opacity-70 leading-relaxed max-w-md">
+                            쇼핑의 즐거움을 더하는 마법 같은 혜택. <br />지금 가장 필요한 쿠폰을 다운로드하세요.
                         </p>
-
-                        <div className="w-full max-w-xl relative mt-8">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input
-                                type="text"
-                                placeholder="브랜드 또는 혜택 검색..."
-                                className="w-full pl-16 pr-8 py-5 bg-background border-2 border-border rounded-[2rem] focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all font-black text-lg"
-                            />
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="container mx-auto px-4 py-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                     {/* Welcome Bonus Card */}
-                    <div className="lg:col-span-3 bg-gradient-to-br from-primary via-indigo-600 to-purple-700 p-12 rounded-[4rem] text-white flex flex-col lg:flex-row items-center justify-between gap-12 relative overflow-hidden group border border-white/10 shadow-3xl shadow-primary/20">
-                        <div className="absolute top-0 right-0 p-20 opacity-10 group-hover:rotate-45 transition-transform duration-1000">
-                            <Gift className="w-80 h-80" />
+                    <div className="lg:col-span-3 bg-gradient-to-br from-primary via-indigo-600 to-purple-700 p-8 rounded-[3rem] text-white flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden group border border-white/10 shadow-2xl shadow-primary/10">
+                        <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:rotate-45 transition-transform duration-1000">
+                            <Gift className="w-48 h-48" />
                         </div>
-                        <div className="space-y-6 relative z-10 text-center lg:text-left">
-                            <div className="px-5 py-2 bg-white/20 backdrop-blur-md rounded-full w-fit mx-auto lg:mx-0 border border-white/20">
-                                <span className="text-xs font-black uppercase tracking-widest text-white">Membership Event</span>
+                        <div className="space-y-4 relative z-10 text-center lg:text-left">
+                            <div className="px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full w-fit mx-auto lg:mx-0 border border-white/20">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-white">Membership Event</span>
                             </div>
-                            <h2 className="text-6xl font-black tracking-tighter leading-tight">신규 가입 <br />무조건 10% 쿠폰</h2>
-                            <p className="text-xl font-medium opacity-80 max-w-md">앱 다운로드 시 즉시 발급! 최고 50,000원까지 할인 혜택을 누리세요.</p>
+                            <h2 className="text-4xl font-black tracking-tighter leading-tight">신규 가입 <br />무조건 10% 쿠폰</h2>
+                            <p className="text-lg font-medium opacity-80 max-w-sm text-balance">앱 다운로드 시 즉시 발급! 최고 50,000원까지 할인 혜택을 누리세요.</p>
                         </div>
-                        <button className="relative z-10 px-16 py-7 bg-white text-primary font-black text-2xl rounded-3xl hover:shadow-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-4 group">
-                            지금 참여하기 <ChevronRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
+                        <button className="relative z-10 px-10 py-5 bg-white text-primary font-black text-xl rounded-2xl hover:shadow-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 group">
+                            지금 참여하기 <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
 
@@ -193,6 +183,6 @@ export default function CouponsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -39,11 +39,11 @@ export default function NewProductPage() {
 
 
     const categories = [
-        { value: 'SHOES', label: '신발 / 스니커즈' },
-        { value: 'CLOTHING', label: '의류 / 패션' },
-        { value: 'ACC', label: '액세서리' },
-        { value: 'ELECTRONICS', label: '전자제품' },
-        { value: 'OTHER', label: '기타' },
+        { value: '신발', label: '신발' },
+        { value: '의류', label: '의류' },
+        { value: '액세서리', label: '액세서리' },
+        { value: '디지털', label: '디지털' },
+        { value: '기타', label: '기타' },
     ];
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

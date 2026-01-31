@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ShoppingBag, User, Menu, LogOut, Sun, Moon, Zap, Trophy, Ticket, Gift, Store, ShieldCheck } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, LogOut, Sun, Moon, Zap, Trophy, Ticket, Store, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTheme } from "next-themes";
 import { cn } from '@/lib/utils';
@@ -38,7 +38,6 @@ export function Header() {
 
     const navItems = [
         { name: '스토어', href: '/store', icon: <ShoppingBag className="w-4 h-4" /> },
-        { name: '이벤트', href: '/event', icon: <Gift className="w-4 h-4" /> },
         { name: '내 쿠폰', href: '/coupons', icon: <Ticket className="w-4 h-4" /> },
     ];
 

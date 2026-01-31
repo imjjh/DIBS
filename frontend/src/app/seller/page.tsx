@@ -84,9 +84,9 @@ export default function SellerDashboard() {
             </div>
 
             {/* Content Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8">
                 {/* Popular Products */}
-                <div className="lg:col-span-2 bg-[#0f0f12] border border-white/5 rounded-[3rem] p-10 space-y-8">
+                <div className="bg-[#0f0f12] border border-white/5 rounded-[3rem] p-10 space-y-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <h3 className="text-2xl font-black tracking-tight">내 상품 현황</h3>
                         <div className="flex items-center gap-4 flex-1 max-w-md">
@@ -120,7 +120,7 @@ export default function SellerDashboard() {
                         <div className="space-y-6">
                             {products.slice(0, 5).map((product) => (
                                 <Link
-                                    href={`/seller/products/${product.id}/edit`}
+                                    href={`/seller/products/${product.id}`}
                                     key={product.id}
                                     className="flex items-center gap-6 p-4 hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-white/5 group/item"
                                 >
@@ -151,25 +151,6 @@ export default function SellerDashboard() {
                             ))}
                         </div>
                     )}
-                </div>
-
-                {/* Quick News / Tips */}
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[3rem] p-10 text-white space-y-8 relative overflow-hidden shadow-2xl shadow-indigo-500/20">
-                    <Zap className="absolute -top-10 -right-10 w-40 h-40 opacity-10 rotate-12" />
-                    <div className="relative z-10">
-                        <h3 className="text-2xl font-black tracking-tight mb-4">판매자 꿀팁 💡</h3>
-                        <div className="space-y-6">
-                            <div className="p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-                                <p className="text-sm font-bold leading-relaxed">"상품 설명에 상세 사진을 5장 이상 등록하면 구매 전환율이 30% 상승합니다."</p>
-                            </div>
-                            <div className="p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-                                <p className="text-sm font-bold leading-relaxed">"고객 문의에 1시간 이내 답변 시 우수 셀러 딱지가 부여됩니다."</p>
-                            </div>
-                        </div>
-                        <button className="w-full mt-10 py-5 bg-white text-indigo-600 font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 shadow-xl">
-                            판매자 가이드 읽기
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

@@ -43,11 +43,11 @@ export default function EditProductPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const categories = [
-        { value: 'SHOES', label: '신발 / 스니커즈' },
-        { value: 'CLOTHING', label: '의류 / 패션' },
-        { value: 'ACC', label: '액세서리' },
-        { value: 'ELECTRONICS', label: '전자제품' },
-        { value: 'OTHER', label: '기타' },
+        { value: '신발', label: '신발' },
+        { value: '의류', label: '의류' },
+        { value: '액세서리', label: '액세서리' },
+        { value: '디지털', label: '디지털' },
+        { value: '기타', label: '기타' },
     ];
 
     const statuses = [
@@ -62,12 +62,21 @@ export default function EditProductPage() {
             try {
                 setIsLoading(true);
                 const product = await productService.getProductById(id);
+                const categoryMapping: Record<string, string> = {
+                    'SHOES': '신발',
+                    'CLOTHING': '의류',
+                    'ACC': '액세서리',
+                    'ELECTRONICS': '디지털',
+                    'OTHER': '기타'
+                };
+                const mappedCategory = (product.category ? categoryMapping[product.category] : null) || product.category || '기타';
+
                 setFormData({
                     name: product.name,
                     description: product.description || '',
                     price: product.price.toString(),
                     stockQuantity: product.stockQuantity?.toString() || '0',
-                    category: product.category || 'OTHER',
+                    category: mappedCategory,
                     imageUrl: product.imageUrl || '',
                     status: product.status
                 });

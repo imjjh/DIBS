@@ -73,17 +73,6 @@ export interface PagedResponse<T> {
 
 export interface ProductListResponse extends PagedResponse<Product> { }
 
-export interface Event {
-    id: number;
-    title: string;
-    productId: number;
-    eventPrice: number;
-    limitQuantity: number;
-    remainingQuantity: number;
-    startAt: string;
-    endAt: string;
-}
-
 export enum CouponType {
     FIXED_AMOUNT = 'FIXED_AMOUNT',
     PERCENTAGE = 'PERCENTAGE'

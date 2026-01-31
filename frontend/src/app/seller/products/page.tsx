@@ -11,6 +11,7 @@ import {
     ExternalLink,
     Edit2,
     Trash2,
+    Eye,
     Clock,
     CheckCircle2,
     AlertCircle,
@@ -161,10 +162,12 @@ export default function SellerProductsPage() {
                                                         <Package className="w-6 h-6 text-white/20" />
                                                     )}
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-white group-hover/row:text-indigo-400 transition-colors">{product.name}</p>
-                                                    <p className="text-xs text-white/30 font-medium tracking-tight mt-1">ID: #{product.id}</p>
-                                                </div>
+                                                <Link href={`/seller/products/${product.id}`}>
+                                                    <div>
+                                                        <p className="font-bold text-white group-hover/row:text-indigo-400 transition-colors cursor-pointer">{product.name}</p>
+                                                        <p className="text-xs text-white/30 font-medium tracking-tight mt-1">ID: #{product.id}</p>
+                                                    </div>
+                                                </Link>
                                             </div>
                                         </td>
                                         <td className="bg-white/[0.02] border-y border-white/5 group-hover/row:bg-white/[0.04] transition-all">
@@ -196,20 +199,30 @@ export default function SellerProductsPage() {
                                         <td className="bg-white/[0.02] rounded-r-3xl px-6 py-5 border-y border-r border-white/5 group-hover/row:bg-white/[0.04] transition-all text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                                                 <button
+                                                    onClick={() => router.push(`/seller/products/${product.id}`)}
+                                                    className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all text-white/60 hover:text-indigo-400"
+                                                    title="상세 인사이트"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button
                                                     onClick={() => router.push(`/seller/products/${product.id}/edit`)}
                                                     className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/10 transition-all text-white/60 hover:text-white"
+                                                    title="수정"
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(product.id)}
                                                     className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl hover:bg-red-500 hover:border-red-500 transition-all text-red-500 hover:text-white"
+                                                    title="삭제"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
                                                 <Link
                                                     href={`/store/${product.id}`}
                                                     className="p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-all text-white/20 hover:text-white"
+                                                    title="스토어에서 보기"
                                                 >
                                                     <ExternalLink className="w-4 h-4" />
                                                 </Link>

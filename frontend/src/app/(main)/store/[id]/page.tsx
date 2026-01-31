@@ -197,10 +197,14 @@ export default function ProductDetailPage() {
                                 </div>
                                 <div className={cn(
                                     "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg",
-                                    product.status === ProductStatus.ON_SALE ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
+                                    product.status === ProductStatus.ON_SALE ? "bg-emerald-500 text-white" :
+                                        product.status === ProductStatus.PREPARING ? "bg-blue-500 text-white" :
+                                            product.status === ProductStatus.RESERVED ? "bg-amber-500 text-white" : "bg-red-500 text-white"
                                 )}>
                                     <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                    {product.status}
+                                    {product.status === ProductStatus.ON_SALE ? 'ON SALE' :
+                                        product.status === ProductStatus.PREPARING ? 'PREPARING' :
+                                            product.status === ProductStatus.RESERVED ? 'RESERVED' : 'SOLD OUT'}
                                 </div>
                             </div>
 
@@ -211,14 +215,15 @@ export default function ProductDetailPage() {
                                     <button
                                         onClick={() => handleQuantityChange('minus')}
                                         className="p-2.5 hover:bg-secondary rounded-xl transition-all disabled:opacity-20"
-                                        disabled={quantity <= 1}
+                                        disabled={quantity <= 1 || product.status !== ProductStatus.ON_SALE}
                                     >
                                         <Minus className="w-4 h-4" />
                                     </button>
                                     <span className="w-12 text-center font-black text-lg">{quantity}</span>
                                     <button
                                         onClick={() => handleQuantityChange('plus')}
-                                        className="p-2.5 hover:bg-secondary rounded-xl transition-all"
+                                        className="p-2.5 hover:bg-secondary rounded-xl transition-all disabled:opacity-20"
+                                        disabled={product.status !== ProductStatus.ON_SALE}
                                     >
                                         <Plus className="w-4 h-4" />
                                     </button>
@@ -230,7 +235,11 @@ export default function ProductDetailPage() {
                                 <Clock className="w-4 h-4" />
                                 <span>남은 수량: <span className="text-foreground tracking-tighter">{product.stockQuantity || 0}</span>개</span>
                                 <span className="w-1 h-1 bg-border rounded-full" />
-                                <span className="text-orange-500">현재 42명이 결제 대기 중</span>
+                                {product.status === ProductStatus.ON_SALE ? (
+                                    <span className="text-orange-500">현재 42명이 결제 대기 중</span>
+                                ) : (
+                                    <span>현재 구매가 불가능한 상태입니다.</span>
+                                )}
                             </div>
                         </div>
 
@@ -238,19 +247,20 @@ export default function ProductDetailPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <button
                                 onClick={handleAddToCart}
-                                disabled={product.status === ProductStatus.SOLD_OUT}
-                                className="h-20 bg-secondary border border-border text-foreground font-black text-xl rounded-[2rem] hover:bg-secondary/80 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                disabled={product.status !== ProductStatus.ON_SALE}
+                                className="h-20 bg-secondary border border-border text-foreground font-black text-xl rounded-[2rem] hover:bg-secondary/80 transition-all flex items-center justify-center gap-3 disabled:opacity-20"
                             >
                                 <ShoppingCart className="w-6 h-6" />
-                                Add to Cart
+                                {product.status === ProductStatus.ON_SALE ? 'Add to Cart' : 'Not Available'}
                             </button>
                             <button
                                 onClick={handleBuyNow}
-                                disabled={product.status === ProductStatus.SOLD_OUT}
-                                className="h-20 bg-primary text-primary-foreground font-black text-xl rounded-[2rem] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
+                                disabled={product.status !== ProductStatus.ON_SALE}
+                                className="h-20 bg-primary text-primary-foreground font-black text-xl rounded-[2rem] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-20 disabled:scale-100"
                             >
                                 <Zap className="w-6 h-6 fill-current" />
-                                Buy It Now
+                                {product.status === ProductStatus.ON_SALE ? 'Buy It Now' :
+                                    product.status === ProductStatus.PREPARING ? 'Coming Soon' : 'Sold Out'}
                             </button>
                         </div>
                     </div>

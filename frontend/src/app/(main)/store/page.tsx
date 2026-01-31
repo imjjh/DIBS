@@ -21,7 +21,7 @@ import { Product, ProductStatus } from '@/types';
 import { productService } from '@/services/productService';
 
 // Mock Categories
-const CATEGORIES = ["전체", "신발", "의류", "액세서리", "디지털", "한정판"];
+const CATEGORIES = ["전체", "신발", "의류", "액세서리", "디지털", "기타"];
 
 
 export default function StorePage() {
@@ -193,17 +193,6 @@ export default function StorePage() {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Store Stats */}
-                        <div className="bg-secondary/10 p-6 rounded-[2rem] border border-border/50">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500">
-                                    <Flame className="w-4 h-4" />
-                                </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">트렌딩</span>
-                            </div>
-                            <p className="text-sm font-bold leading-tight">많은 사람들이<br />디입스 중!</p>
-                        </div>
                     </aside>
 
                     {/* Main Content: Product Grid */}
@@ -249,13 +238,22 @@ export default function StorePage() {
                                                 )}
                                             </div>
 
-                                            {/* Action Button: Visible on Hover */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
-                                                <button className="px-8 py-3 bg-white text-black font-black rounded-2xl shadow-2xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                                    <ShoppingCart className="w-4 h-4" />
-                                                    바로 구매
-                                                </button>
-                                            </div>
+                                            {/* Action Button: Visible on Hover (Only for ON_SALE) */}
+                                            {product.status === ProductStatus.ON_SALE && (
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
+                                                    <button className="px-8 py-3 bg-white text-black font-black rounded-2xl shadow-2xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                                        <ShoppingCart className="w-4 h-4" />
+                                                        바로 구매
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {product.status === ProductStatus.PREPARING && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="px-6 py-2 bg-blue-500 text-white font-black rounded-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                                        COMING SOON
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Product Info */}
