@@ -20,6 +20,10 @@ import com.imjjh.Dibs.auth.exception.AuthErrorCode;
 import com.imjjh.Dibs.common.exception.BusinessException;
 import org.springframework.http.HttpHeaders;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "인증 관련 API", description = "로그인, 회원가입, 토큰 재발급 등 인증 관련 기능을 제공합니다.")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -29,6 +33,7 @@ public class AuthController {
         private final RefreshTokenRepository refreshTokenRepository;
         private final AuthService authService;
 
+        @Operation(summary = "아이디 중복 확인", description = "입력한 아이디가 이미 존재하는지 확인합니다.")
         @PostMapping("/validateUsername")
         @ResponseStatus(HttpStatus.OK)
         public ApiResponse<Void> validateUsername(
@@ -37,6 +42,7 @@ public class AuthController {
                 return ApiResponse.success();
         }
 
+        @Operation(summary = "이메일 중복 확인", description = "입력한 이메일이 이미 존재하는지 확인합니다.")
         @PostMapping("/validateEmail")
         @ResponseStatus(HttpStatus.OK)
         public ApiResponse<Void> validateEmail(@Valid @RequestBody ValidEmailRequestDto requestDto) {
@@ -44,6 +50,7 @@ public class AuthController {
                 return ApiResponse.success();
         }
 
+        @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
         @PostMapping("/register")
         @ResponseStatus(HttpStatus.CREATED)
         public ApiResponse<Void> register(@Valid @RequestBody RegisterRequestDto requestDto) {
@@ -51,6 +58,7 @@ public class AuthController {
                 return ApiResponse.success();
         }
 
+        @Operation(summary = "로그인", description = "사용자 인증을 진행하고 쿠키에 토큰을 설정합니다.")
         @PostMapping("/login")
         @ResponseStatus(HttpStatus.OK)
         public ApiResponse<CurrentUserResponseDto> login(
@@ -79,12 +87,7 @@ public class AuthController {
                 return ApiResponse.success(CurrentUserResponseDto.of(responseDto.user()));
         }
 
-        /**
-         * 로그인 상태를 확인하고 로그인된 상태라면 유저 정보를 반환합니다.
-         *
-         * @param userDetails
-         * @return 로그인 ? 유저 정보 : null
-         */
+        @Operation(summary = "현재 사용자 정보 조회", description = "로그인된 사용자의 정보를 가져옵니다.")
         @GetMapping("/me")
         @ResponseStatus(HttpStatus.OK)
         public ApiResponse<CurrentUserResponseDto> getCurrentUser(
@@ -100,13 +103,7 @@ public class AuthController {
                 return ApiResponse.success(CurrentUserResponseDto.of(userEntity));
         }
 
-        /**
-         * 로그아웃 메서드
-         * accessToken 쿠키를 덮어써 기존 쿠키를 제거합니다.
-         * TODO: blackList, refresh 쿠키 & redis에서 제거
-         *
-         * @return
-         */
+        @Operation(summary = "로그아웃", description = "사용자 세션을 종료하고 토큰 쿠키를 제거합니다.")
         @PostMapping("/logout")
         @ResponseStatus(HttpStatus.OK)
         public ApiResponse<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -141,6 +138,7 @@ public class AuthController {
                 return ApiResponse.success();
         }
 
+        @Operation(summary = "토큰 재발급", description = "RefreshToken을 통해 새로운 AccessToken을 발급받습니다.")
         @PostMapping("/refresh")
         @ResponseStatus(HttpStatus.OK)
         public ApiResponse<Void> refresh(

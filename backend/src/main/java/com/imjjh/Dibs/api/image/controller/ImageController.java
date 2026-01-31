@@ -18,6 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "이미지 업로드 관련 API", description = "S3를 이용한 이미지 업로드 기능을 제공합니다.")
 @RestController
 @RequestMapping("/api/images")
 @RequiredArgsConstructor

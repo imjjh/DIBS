@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "판매자 상품 관련 API", description = "")
+@Tag(name = "판매자 전용 상품 관리 API", description = "판매자가 등록한 상품 목록 조회 및 관리를 위한 기능을 제공합니다.")
 @RestController
 @RequestMapping("/api/seller/products")
 @RequiredArgsConstructor

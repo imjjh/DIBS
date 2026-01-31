@@ -17,6 +17,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "상품 관련 API", description = "모든 사용자가 접근 가능한 상품 조회 및 구매/장바구니 기능을 제공합니다.")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
