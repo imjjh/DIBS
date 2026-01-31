@@ -29,32 +29,34 @@ export default function StorePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
-    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+    const [submittedSearchQuery, setSubmittedSearchQuery] = useState("");
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [mounted, setMounted] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [totalElements, setTotalElements] = useState(0);
 
-    // Debounce search query
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearchQuery(searchQuery);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
-
     useEffect(() => {
         setMounted(true);
         loadProducts();
-    }, [selectedCategory, debouncedSearchQuery]);
+    }, [selectedCategory, submittedSearchQuery]);
+
+    const handleSearchSubmit = () => {
+        setSubmittedSearchQuery(searchQuery);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearchSubmit();
+        }
+    };
 
     const loadProducts = async () => {
         try {
             setIsLoading(true);
             const response = await productService.getProducts({
                 category: selectedCategory === "전체" ? undefined : selectedCategory,
-                keyword: debouncedSearchQuery || undefined,
+                keyword: submittedSearchQuery || undefined,
                 page: 1,
                 size: 12
             });
@@ -79,7 +81,7 @@ export default function StorePage() {
             const lastProduct = products[products.length - 1];
             const response = await productService.getProducts({
                 category: selectedCategory === "전체" ? undefined : selectedCategory,
-                keyword: debouncedSearchQuery || undefined,
+                keyword: submittedSearchQuery || undefined,
                 lastProductId: lastProduct?.id,
                 page: Math.floor(products.length / 12) + 1,
                 size: 12
@@ -130,8 +132,15 @@ export default function StorePage() {
                                 placeholder="아이템 또는 브랜드 검색..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-14 pr-6 py-4 bg-background border border-border rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold placeholder:text-muted-foreground/50"
+                                onKeyDown={handleKeyDown}
+                                className="w-full pl-14 pr-32 py-4 bg-background border border-border rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold placeholder:text-muted-foreground/50"
                             />
+                            <button
+                                onClick={handleSearchSubmit}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-primary text-primary-foreground text-xs font-black rounded-xl hover:shadow-lg transition-all active:scale-95"
+                            >
+                                검색
+                            </button>
                         </div>
                         <div className="flex gap-2">
                             <button className="px-6 py-4 border border-border rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-secondary transition-all">

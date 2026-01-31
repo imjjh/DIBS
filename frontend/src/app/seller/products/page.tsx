@@ -29,13 +29,24 @@ export default function SellerProductsPage() {
     const { user } = useAuthStore();
     const router = useRouter();
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     const fetchMyProducts = async () => {
         try {
             setIsLoading(true);
-            // Fetch products - filtering by seller locally as standard API doesn't have seller-specific endpoint yet
-            const response = await productService.getProducts({ size: 100 });
-            const myItems = response.items.filter(p => p.sellerId === user?.id);
-            setProducts(myItems);
+            const response = await productService.getSellerProducts({
+                keyword: debouncedSearch || undefined,
+                size: 100
+            });
+            setProducts(response.items);
         } catch (error) {
             console.error('Failed to fetch products:', error);
         } finally {
@@ -45,7 +56,7 @@ export default function SellerProductsPage() {
 
     useEffect(() => {
         if (user) fetchMyProducts();
-    }, [user]);
+    }, [user, debouncedSearch]);
 
     const handleDelete = async (id: number) => {
         if (!confirm('정말로 이 상품을 삭제하시겠습니까?')) return;
@@ -95,6 +106,8 @@ export default function SellerProductsPage() {
                             <input
                                 type="text"
                                 placeholder="상품명 검색..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-12 pr-6 py-3 bg-white/5 border border-white/5 rounded-2xl text-sm font-medium focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.08] transition-all min-w-[280px]"
                             />
                         </div>
@@ -171,10 +184,12 @@ export default function SellerProductsPage() {
                                                 product.status === 'ON_SALE' && "bg-emerald-500/10 text-emerald-500",
                                                 product.status === 'SOLD_OUT' && "bg-red-500/10 text-red-500",
                                                 product.status === 'RESERVED' && "bg-amber-500/10 text-amber-500",
+                                                product.status === 'PREPARING' && "bg-blue-500/10 text-blue-500",
                                             )}>
                                                 {product.status === 'ON_SALE' && <CheckCircle2 className="w-3 h-3" />}
                                                 {product.status === 'SOLD_OUT' && <AlertCircle className="w-3 h-3" />}
                                                 {product.status === 'RESERVED' && <Clock className="w-3 h-3" />}
+                                                {product.status === 'PREPARING' && <Loader2 className="w-3 h-3 animate-spin" />}
                                                 {product.status}
                                             </div>
                                         </td>

@@ -34,7 +34,8 @@ export interface AuthResponse {
 export enum ProductStatus {
     ON_SALE = 'ON_SALE',
     RESERVED = 'RESERVED',
-    SOLD_OUT = 'SOLD_OUT'
+    SOLD_OUT = 'SOLD_OUT',
+    PREPARING = 'PREPARING'
 }
 
 export interface Product {

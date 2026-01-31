@@ -51,6 +51,7 @@ export default function EditProductPage() {
     ];
 
     const statuses = [
+        { value: 'PREPARING', label: '준비 중', color: 'blue' },
         { value: 'ON_SALE', label: '판매 중', color: 'emerald' },
         { value: 'RESERVED', label: '예약 중', color: 'amber' },
         { value: 'SOLD_OUT', label: '품절', color: 'red' },

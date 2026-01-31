@@ -30,11 +30,13 @@ export default function NewProductPage() {
         price: '',
         stockQuantity: '',
         category: 'SHOES',
-        imageUrl: ''
+        imageUrl: '',
     });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+
 
     const categories = [
         { value: 'SHOES', label: '신발 / 스니커즈' },
@@ -79,7 +81,9 @@ export default function NewProductPage() {
             }
 
             const payload = {
-                ...formData,
+                name: formData.name,
+                description: formData.description,
+                category: formData.category,
                 imageUrl: finalImageUrl,
                 price: Number(formData.price),
                 stockQuantity: Number(formData.stockQuantity)
