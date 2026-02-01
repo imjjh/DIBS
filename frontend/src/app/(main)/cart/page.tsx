@@ -11,55 +11,74 @@ import {
     ShieldCheck,
     Truck,
     ArrowLeft,
-    CreditCard
+    CreditCard,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Mock Cart Data
-const MOCK_CART_ITEMS = [
-    {
-        id: 1,
-        name: "DIBS! 에디션 울트라 리미티드 스니커즈",
-        price: 189000,
-        count: 1,
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop",
-        seller: "DIBS! Official",
-        stockStatus: "재고 소량"
-    },
-    {
-        id: 2,
-        name: "프리미엄 노이즈 캔슬링 헤드셋",
-        price: 349000,
-        count: 2,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop",
-        seller: "SoundMaster",
-        stockStatus: "재고 여유"
-    }
-];
+import { cartService, CartItemResponse } from '@/services/cartService';
 
 export default function CartPage() {
-    const [cartItems, setCartItems] = useState(MOCK_CART_ITEMS);
+    const [cartItems, setCartItems] = useState<CartItemResponse[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+
+    const fetchCartItems = async () => {
+        try {
+            setIsLoading(true);
+            const response = await cartService.getCartItems();
+            setCartItems(response.items);
+        } catch (error) {
+            console.error("Failed to fetch cart items:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     useEffect(() => {
         setMounted(true);
+        fetchCartItems();
     }, []);
 
     if (!mounted) return null;
 
-    const updateCount = (id: number, delta: number) => {
-        setCartItems(prev => prev.map(item =>
-            item.id === id ? { ...item, count: Math.max(1, item.count + delta) } : item
-        ));
+    const updateCount = async (productId: number, newCount: number) => {
+        if (newCount < 1) return;
+
+        try {
+            await cartService.updateCartItemQuantity(productId, newCount);
+            setCartItems(prev => prev.map(item =>
+                item.productId === productId ? { ...item, quantity: newCount } : item
+            ));
+        } catch (error) {
+            console.error("Failed to update quantity:", error);
+            alert("수량 변경에 실패했습니다.");
+        }
     };
 
-    const removeItem = (id: number) => {
-        setCartItems(prev => prev.filter(item => item.id !== id));
+    const removeItem = async (productId: number) => {
+        if (!confirm("정말 삭제하시겠습니까?")) return;
+        try {
+            await cartService.removeCartItem(productId);
+            setCartItems(prev => prev.filter(item => item.productId !== productId));
+        } catch (error) {
+            console.error("Failed to remove item:", error);
+            alert("상품 삭제에 실패했습니다.");
+        }
     };
 
-    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.count), 0);
-    const shippingFee = totalPrice > 50000 ? 0 : 3000;
+    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const shippingFee = totalPrice > 50000 || cartItems.length === 0 ? 0 : 3000;
     const finalPrice = totalPrice + shippingFee;
+
+    if (isLoading) {
+        return (
+            <div className="min-h-[70vh] flex flex-col items-center justify-center">
+                <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                <p className="font-black text-muted-foreground uppercase tracking-widest text-sm">Loading your cart...</p>
+            </div>
+        );
+    }
 
     if (cartItems.length === 0) {
         return (
@@ -106,24 +125,28 @@ export default function CartPage() {
 
                             <div className="divide-y divide-border/50">
                                 {cartItems.map((item) => (
-                                    <div key={item.id} className="p-8 flex flex-col md:flex-row gap-8 group">
+                                    <div key={item.productId} className="p-8 flex flex-col md:flex-row gap-8 group">
+
                                         {/* Product Image */}
                                         <div className="relative w-full md:w-32 aspect-square bg-muted rounded-[2rem] overflow-hidden shadow-lg group-hover:shadow-primary/10 transition-all duration-500 shrink-0">
-                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/50 backdrop-blur-md text-[8px] font-black text-white rounded-lg">
-                                                {item.stockStatus}
-                                            </div>
+                                            {item.imageUrl ? (
+                                                <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground/20">
+                                                    <ShoppingBag className="w-12 h-12" />
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Info */}
                                         <div className="flex-1 space-y-2">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div>
-                                                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{item.seller}</p>
-                                                    <h3 className="text-xl font-black tracking-tight leading-tight group-hover:text-primary transition-colors">{item.name}</h3>
+                                                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">{item.sellerName}</p>
+                                                    <h3 className="text-xl font-black tracking-tight leading-tight group-hover:text-primary transition-colors">{item.productName}</h3>
                                                 </div>
                                                 <button
-                                                    onClick={() => removeItem(item.id)}
+                                                    onClick={() => removeItem(item.productId)}
                                                     className="p-3 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 rounded-2xl transition-all active:scale-90"
                                                 >
                                                     <Trash2 className="w-5 h-5" />
@@ -133,22 +156,22 @@ export default function CartPage() {
                                             <div className="flex flex-wrap items-end justify-between pt-4">
                                                 <div className="flex items-center bg-secondary/20 p-1.5 rounded-2xl border border-border/50">
                                                     <button
-                                                        onClick={() => updateCount(item.id, -1)}
+                                                        onClick={() => updateCount(item.productId, item.quantity - 1)}
                                                         className="p-2 hover:bg-background rounded-xl transition-all active:scale-90"
                                                     >
                                                         <Minus className="w-4 h-4" />
                                                     </button>
-                                                    <span className="w-12 text-center font-black text-sm">{item.count}</span>
+                                                    <span className="w-12 text-center font-black text-sm">{item.quantity}</span>
                                                     <button
-                                                        onClick={() => updateCount(item.id, 1)}
+                                                        onClick={() => updateCount(item.productId, item.quantity + 1)}
                                                         className="p-2 hover:bg-background rounded-xl transition-all active:scale-90"
                                                     >
                                                         <Plus className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-2xl font-black tracking-tighter">{(item.price * item.count).toLocaleString()}<span className="text-sm ml-1">원</span></p>
-                                                    {item.count > 1 && (
+                                                    <p className="text-2xl font-black tracking-tighter">{(item.price * item.quantity).toLocaleString()}<span className="text-sm ml-1">원</span></p>
+                                                    {item.quantity > 1 && (
                                                         <p className="text-xs text-muted-foreground font-bold">개당 {item.price.toLocaleString()}원</p>
                                                     )}
                                                 </div>

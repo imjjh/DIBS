@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { productService } from '@/services/productService';
+import { cartService } from '@/services/cartService';
 import { ProductDetail, ProductStatus } from '@/types';
 
 export default function ProductDetailPage() {
@@ -54,9 +55,29 @@ export default function ProductDetailPage() {
         }
     };
 
-    const handleAddToCart = () => {
-        alert(`${product?.name} ${quantity}개가 장바구니에 담겼습니다.`);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleAddToCart = async () => {
+        if (!product || isSubmitting) return;
+
+        try {
+            setIsSubmitting(true);
+            await cartService.addToCart(product.id, quantity);
+
+            // confirm 사용 시 브라우저 멈춤 현상 방지를 위해 setTimeout이나 
+            // 렌더링 사이클 외부에서 호출하는 것이 안전할 때가 있습니다.
+            const move = window.confirm(`${product.name} ${quantity}개가 장바구니에 담겼습니다.\n장바구니로 이동하시겠습니까?`);
+            if (move) {
+                router.push('/cart');
+            }
+        } catch (error: any) {
+            console.error("Cart Error Details:", error.response?.data || error.message);
+            alert("장바구니 담기에 실패했습니다.\n" + (error.response?.data?.message || "로그인 상태를 확인해주세요."));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
 
     const handleBuyNow = () => {
         alert('주문 페이지로 이동합니다.');
@@ -246,16 +267,21 @@ export default function ProductDetailPage() {
                         {/* Buy Actions */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <button
-                                onClick={handleAddToCart}
-                                disabled={product.status !== ProductStatus.ON_SALE}
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleAddToCart();
+                                }}
+                                disabled={product.status !== ProductStatus.ON_SALE || isSubmitting}
                                 className="h-20 bg-secondary border border-border text-foreground font-black text-xl rounded-[2rem] hover:bg-secondary/80 transition-all flex items-center justify-center gap-3 disabled:opacity-20"
                             >
                                 <ShoppingCart className="w-6 h-6" />
-                                {product.status === ProductStatus.ON_SALE ? 'Add to Cart' : 'Not Available'}
+                                {isSubmitting ? 'Adding...' : product.status === ProductStatus.ON_SALE ? 'Add to Cart' : 'Not Available'}
                             </button>
+
                             <button
                                 onClick={handleBuyNow}
-                                disabled={product.status !== ProductStatus.ON_SALE}
+                                disabled={product.status !== ProductStatus.ON_SALE || isSubmitting}
                                 className="h-20 bg-primary text-primary-foreground font-black text-xl rounded-[2rem] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-20 disabled:scale-100"
                             >
                                 <Zap className="w-6 h-6 fill-current" />
@@ -263,6 +289,7 @@ export default function ProductDetailPage() {
                                     product.status === ProductStatus.PREPARING ? 'Coming Soon' : 'Sold Out'}
                             </button>
                         </div>
+
                     </div>
                 </div>
 
