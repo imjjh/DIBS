@@ -63,7 +63,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = queryFactory
+        Long total = queryFactory
                 .select(productEntity.count())
                 .from(productEntity)
                 .where(
@@ -73,9 +73,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 )
                 .fetchOne();
 
-        Page<ProductSimpleResponseDto> result = new PageImpl<>(content, pageable, total);
-
-        return result;
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
 

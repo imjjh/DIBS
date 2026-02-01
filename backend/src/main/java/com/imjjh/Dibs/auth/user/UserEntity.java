@@ -78,12 +78,13 @@ public class UserEntity extends BaseEntity {
         this.roles.add(userRole);
     }
 
+
     /**
      * OAuth2 회원가입
-     * 
+     *
      * @param provider
      * @param providerId
-     * @param nickName
+     * @param nickname
      * @param username
      * @param email
      */

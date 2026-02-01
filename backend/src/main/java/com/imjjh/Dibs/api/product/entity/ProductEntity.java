@@ -25,7 +25,7 @@ public class ProductEntity extends BaseEntity implements Ownable {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id") // referencedColumnName의 기본값이 상대방의 PK라서 굳이 적지 않아도 됨
+    @JoinColumn(name = "seller_id",referencedColumnName = "id")
     private UserEntity seller;
 
     @Column
