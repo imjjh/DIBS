@@ -63,10 +63,13 @@ public class OrderService {
 
             ProductEntity productEntity = productEntityMap.get(item.productId());
 
+            productEntity.removeStock(item.quantity());
+
             // 상품이 없는 경우
             if (productEntity == null) {
                 throw new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
             }
+
 
             OrderItemEntity orderItemEntity = OrderItemEntity.create(productEntity, item.quantity());
 
@@ -91,6 +94,11 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
 
         orderEntity.cancel();
+
+        // 재고 복구
+        for (OrderItemEntity item : orderEntity.getOrderItems()) {
+            item.getProduct().addStock(item.getQuantity());
+        }
 
         // 장바구니에 다시 추가
         if (Boolean.TRUE.equals(addToCart)) {

@@ -1,10 +1,13 @@
 package com.imjjh.Dibs.api.product.entity;
 
+import com.imjjh.Dibs.api.product.exception.ProductErrorCode;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.common.BaseEntity;
 import com.imjjh.Dibs.common.Ownable;
+import com.imjjh.Dibs.common.exception.BusinessException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +28,7 @@ public class ProductEntity extends BaseEntity implements Ownable {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id",referencedColumnName = "id")
+    @JoinColumn(name = "seller_id", referencedColumnName = "id")
     private UserEntity seller;
 
     @Column
@@ -42,7 +45,7 @@ public class ProductEntity extends BaseEntity implements Ownable {
 
     @Column(nullable = false)
     @Setter
-    private Integer stockQuantity;
+    private Long stockQuantity;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(20)")
     @Enumerated(EnumType.STRING)
@@ -72,7 +75,7 @@ public class ProductEntity extends BaseEntity implements Ownable {
 
     @Builder
     public ProductEntity(UserEntity seller, String name, String description,
-            Long price, Integer stockQuantity,
+            Long price, Long stockQuantity,
             String imageUrl, String category) {
         this.seller = seller;
         this.name = name;
@@ -96,5 +99,26 @@ public class ProductEntity extends BaseEntity implements Ownable {
     @Override
     public Long getOwnerId() {
         return this.seller.getId();
+    }
+
+    /**
+     * 주문 생성시 재고 차감
+     * 
+     * @param quantity
+     */
+    public void removeStock(Long quantity) {
+        if (stockQuantity - quantity < 0) {
+            throw new BusinessException(ProductErrorCode.NO_STOCK_QUANTITY);
+        }
+        this.stockQuantity -= quantity;
+    }
+
+    /**
+     * 주문 취소시 재고 복구
+     * 
+     * @param quantity
+     */
+    public void addStock(Long quantity) {
+        this.stockQuantity += quantity;
     }
 }
