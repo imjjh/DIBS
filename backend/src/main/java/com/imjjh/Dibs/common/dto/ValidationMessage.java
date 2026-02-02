@@ -14,4 +14,6 @@ public class ValidationMessage {
         public static final String PASSWORD_SIZE = "비밀번호는 8자 이상 20자 이하로 입력해주세요.";
         public static final String PASSWORD_FORMAT = "비밀번호는 영문 대/소문자, 숫자, 특수문자를 포함해야 합니다.";
     }
+
+    public static final String MIN_QUANTITY = "수량은 최소 1개 이상이어야 합니다.";
 }

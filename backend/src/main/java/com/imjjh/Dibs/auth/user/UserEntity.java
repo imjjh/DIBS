@@ -78,7 +78,6 @@ public class UserEntity extends BaseEntity {
         this.roles.add(userRole);
     }
 
-
     /**
      * OAuth2 회원가입
      *
@@ -96,6 +95,21 @@ public class UserEntity extends BaseEntity {
         this.username = username;
         this.email = email;
         this.password = null;
+    }
+
+    @Column(length = 255)
+    private String address;
+
+    @Column(length = 255)
+    private String addressDetail;
+
+    @Column(length = 20)
+    private String zipCode;
+
+    public void updateAddress(String address, String addressDetail, String zipCode) {
+        this.address = address;
+        this.addressDetail = addressDetail;
+        this.zipCode = zipCode;
     }
 
     /**
