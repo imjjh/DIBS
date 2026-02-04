@@ -73,6 +73,9 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
+	// Testcontainers
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+    testImplementation 'org.testcontainers:mysql:1.20.1'
 }
 
 
@@ -116,6 +119,9 @@ tasks.withType(Test){
 
 		// 실패 시 예외 내용 자세히 보기
 		exceptionFormat "full"
+
+		// stdout, stderr 출력 보이기 (log.info 등)
+		showStandardStreams = true
 	}
 }
 

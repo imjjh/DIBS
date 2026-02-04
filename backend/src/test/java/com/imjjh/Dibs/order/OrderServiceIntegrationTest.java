@@ -7,9 +7,14 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.imjjh.Dibs.api.order.dto.request.OrderCreateRequestDto;
@@ -23,13 +28,33 @@ import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.common.annotation.IntegrationTest;
 
-import lombok.extern.slf4j.Slf4j;
-
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import com.imjjh.Dibs.common.service.S3Service;
 
 @Slf4j
 @IntegrationTest
+@Testcontainers
 public class OrderServiceIntegrationTest {
+
+    // 테스트에서 사용할 MySQL 컨테이너 정의 (MySQL 8.4 + general_log 활성화)
+    @Container
+    private static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:8.4")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test")
+            .withCommand("--general-log=1", "--general-log-file=/var/lib/mysql/general.log");
+
+    // 컨테이너의 동적 포트와 정보를 스프링 데이터소스에 주입
+    @DynamicPropertySource
+    static void registerPgProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
+        registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
+        registry.add("spring.jpa.properties.hibernate.dialect", () -> "org.hibernate.dialect.MySQLDialect");
+    }
 
     @Autowired
     private OrderService orderService;
@@ -91,6 +116,11 @@ public class OrderServiceIntegrationTest {
 
         // then
         ProductEntity resultEntity = productRepository.findById(productEntity.getId()).orElseThrow();
+
+        log.info("남은 재고: {}", resultEntity.getStockQuantity());
+
+        // 6000초 대기
+        // Thread.sleep(6000000);
 
         assertThat(resultEntity.getStockQuantity()).isEqualTo(0);
     }
