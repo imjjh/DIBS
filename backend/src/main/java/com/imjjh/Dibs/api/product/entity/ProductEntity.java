@@ -7,7 +7,6 @@ import com.imjjh.Dibs.common.Ownable;
 import com.imjjh.Dibs.common.exception.BusinessException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

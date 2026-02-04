@@ -1,6 +1,9 @@
 package com.imjjh.Dibs.api.order.entity;
 
+import com.imjjh.Dibs.api.product.exception.ProductErrorCode;
 import com.imjjh.Dibs.auth.user.UserEntity;
+import com.imjjh.Dibs.common.exception.BusinessException;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import org.springframework.data.annotation.CreatedDate;
@@ -83,5 +86,19 @@ public class OrderEntity {
 
     public void cancel() {
         this.status = OrderStatus.CANCELLED;
+    }
+
+    public void calculateTotalPrice() {
+        this.totalPrice = this.orderItems.stream()
+                .mapToLong(item -> {
+                    Long price = item.getOrderPrice();
+
+                    if (price == null) {
+                        throw new BusinessException(ProductErrorCode.NO_ORDER_PRICE);
+                    }
+
+                    return price * item.getQuantity();
+                })
+                .sum();
     }
 }

@@ -10,7 +10,8 @@ import com.imjjh.Dibs.common.exception.ErrorCode;
 @RequiredArgsConstructor
 public enum ProductErrorCode implements ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
-    NO_STOCK_QUANTITY(HttpStatus.CONFLICT, "재고가 없습니다.");
+    NO_STOCK_QUANTITY(HttpStatus.CONFLICT, "재고가 없습니다."),
+    NO_ORDER_PRICE(HttpStatus.CONFLICT, "주문 가격이 없습니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -4,9 +4,11 @@ import com.imjjh.Dibs.common.dto.ValidationMessage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 
 import java.util.List;
 
+@Builder
 public record OrderCreateRequestDto(
                 @Schema(description = "수령인 이름", example = "홍길동") @NotBlank(message = "수령인 이름은 필수입니다.") String recipientName,
 

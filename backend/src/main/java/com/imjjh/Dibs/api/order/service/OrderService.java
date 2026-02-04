@@ -16,14 +16,12 @@ import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.Dibs.common.exception.BusinessException;
-import com.imjjh.Dibs.common.exception.CommonErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +35,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
 
     @Transactional
-    public void createOrder(CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
+    public synchronized void createOrder(CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
         // 유저 조회
         UserEntity userEntity = userRepository.findById(userDetails.getNameLong())
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.USER_NOT_FOUND));
@@ -63,19 +61,21 @@ public class OrderService {
 
             ProductEntity productEntity = productEntityMap.get(item.productId());
 
-            productEntity.removeStock(item.quantity());
-
             // 상품이 없는 경우
             if (productEntity == null) {
                 throw new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
             }
 
+            productEntity.removeStock(item.quantity());
 
             OrderItemEntity orderItemEntity = OrderItemEntity.create(productEntity, item.quantity());
 
             // 주문목록에 상품을 추가
             orderEntity.addOrderItem(orderItemEntity);
         }
+
+        // 최종 가격 계산
+        orderEntity.calculateTotalPrice();
 
         // 주문 등록
         orderRepository.save(orderEntity);

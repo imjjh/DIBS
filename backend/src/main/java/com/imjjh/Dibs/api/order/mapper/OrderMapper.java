@@ -8,18 +8,15 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, // 스프링 빈으로 등록
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, // null 이면 무시
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, builder = @Builder(disableBuilder = true))
 public interface OrderMapper {
-    //    @Mapping()
 
     // 조회
     OrderDetailResponseDto toDetailDto(OrderEntity entity);
 
     // 생성
-    @Mapping(target = "id",ignore = true)
-    @Mapping(target = "orderItems",ignore = true)
-    OrderEntity toEntity(OrderCreateRequestDto dto, UserEntity buyer);
-
+    @Mapping(source = "dto.zipCode", target = "zipCode")
+    @Mapping(target = "orderItems", ignore = true) // OrderService에서 직접 처리
+    OrderEntity toEntity(OrderCreateRequestDto dto, UserEntity user);
 
 }
-
