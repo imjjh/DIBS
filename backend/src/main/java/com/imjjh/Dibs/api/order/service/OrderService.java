@@ -35,7 +35,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
 
     @Transactional
-    public synchronized void createOrder(CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
+    public void createOrder(CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
         // 유저 조회
         UserEntity userEntity = userRepository.findById(userDetails.getNameLong())
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.USER_NOT_FOUND));

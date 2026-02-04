@@ -1,6 +1,7 @@
 package com.imjjh.Dibs.api.order.controller;
 
 import com.imjjh.Dibs.api.order.dto.request.OrderCreateRequestDto;
+import com.imjjh.Dibs.api.order.service.OrderFacade;
 import com.imjjh.Dibs.api.order.service.OrderService;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.common.dto.ApiResponse;
@@ -20,13 +21,14 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderFacade orderFacade;
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "주문 생성 (가주문)")
     public ApiResponse<Void> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
-         orderService.createOrder(userDetails,requestDto);
+        orderFacade.createOrderWithLock(userDetails, requestDto);
         return ApiResponse.success();
     }
 
@@ -37,7 +39,7 @@ public class OrderController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("orderId") Long orderId,
             @RequestParam("addToCart") Boolean addToCart) {
-        orderService.cancelOrder(userDetails, orderId,addToCart);
+        orderService.cancelOrder(userDetails, orderId, addToCart);
         return ApiResponse.success();
     }
 }

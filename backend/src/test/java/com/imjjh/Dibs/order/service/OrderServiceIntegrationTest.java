@@ -1,4 +1,4 @@
-package com.imjjh.Dibs.order;
+package com.imjjh.Dibs.order.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.imjjh.Dibs.api.order.dto.request.OrderCreateRequestDto;
+import com.imjjh.Dibs.api.order.service.OrderFacade;
 import com.imjjh.Dibs.api.order.service.OrderService;
 import com.imjjh.Dibs.api.product.entity.ProductEntity;
 import com.imjjh.Dibs.api.product.entity.StatusType;
@@ -57,7 +57,7 @@ public class OrderServiceIntegrationTest {
     }
 
     @Autowired
-    private OrderService orderService;
+    private OrderFacade orderFacade;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -104,7 +104,7 @@ public class OrderServiceIntegrationTest {
                             .shippingAddress("서울시 00구")
                             .orderItems(List.of(new OrderCreateRequestDto.OrderItemRequest(productEntity.getId(), 1L)))
                             .build();
-                    orderService.createOrder(userDetails, requestDto);
+                    orderFacade.createOrderWithLock(userDetails, requestDto);
                 } finally {
                     latch.countDown();
                 }
