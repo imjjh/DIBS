@@ -3,8 +3,8 @@ package com.imjjh.Dibs.api.sellerapplication.dto;
 import com.imjjh.Dibs.common.dto.PageableRequest;
 
 public record SellerApplicationSearchRequestDto(
-        Integer page,
+                @Override Integer page,
 
-        Integer size
-)
-implements PageableRequest { }
+                @Override Integer size)
+                implements PageableRequest {
+}
