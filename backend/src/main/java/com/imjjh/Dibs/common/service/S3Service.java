@@ -46,6 +46,9 @@ public class S3Service {
      * @param imageUrl
      */
     public void deleteImageFile(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return;
+        }
         String key = imageUrl.substring(imageUrl.lastIndexOf("/") + 1); // URL에서 마지막 '/' 이후 파일명만 추출
         s3Template.deleteObject(bucket, key);
     }

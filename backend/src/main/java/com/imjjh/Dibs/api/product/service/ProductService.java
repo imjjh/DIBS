@@ -127,11 +127,11 @@ public class ProductService {
         // S3 삭제를 위한 URL
         String urlToDelete = productEntity.getImageUrl();
 
-        // 엔티티 삭제
+        // 엔티티 소프트 삭제 + 사진 실제 삭제로 url = null
         productEntity.delete();
 
         // S3에서 이미지 삭제
-        s3Service.deleteImageFile(productEntity.getImageUrl());
+        s3Service.deleteImageFile(urlToDelete);
 
     }
 }
