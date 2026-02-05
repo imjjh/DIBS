@@ -9,23 +9,8 @@ import { productService } from "@/services/productService";
 import { Product } from "@/types";
 
 export default function Home() {
-    const [timeLeft, setTimeLeft] = useState(3600); // 1 hour for demo
     const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
     const [isTrendingLoading, setIsTrendingLoading] = useState(true);
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    const formatTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
 
     useEffect(() => {
         const fetchTrending = async () => {
@@ -60,68 +45,56 @@ export default function Home() {
 
                 <div className="container relative z-20 px-4 md:px-6">
                     <div className="max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest">
-                            <Zap className="w-3 h-3 fill-current" />
-                            <span>EXCLUSIVE TIME DEAL</span>
-                        </div>
-
                         <div className="space-y-4">
                             <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[0.9]">
-                                NEXT-GEN <br />
-                                <span className="text-primary italic">WORKSPACE</span>
+                                SIMPLY <br />
+                                <span className="text-primary italic">DIBS!</span>
                             </h1>
                             <p className="text-xl text-muted-foreground max-w-[500px] font-medium leading-relaxed">
-                                선착순 50명 한정, 새로운 생산성을 경험하세요. <br />
-                                정해진 수량이 소진되면 이벤트는 즉시 종료됩니다.
+                                엄선된 프리미엄 아이템을 가장 먼저 만나보세요. <br />
+                                최고의 큐레이션으로 보답하는 DIBS 쇼핑몰입니다.
                             </p>
                         </div>
 
-                        <div className="flex flex-wrap gap-6 items-center">
+                        <div className="flex flex-wrap gap-8 items-center">
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">마감까지 남은 시간</span>
-                                <div className="text-4xl font-mono font-black text-foreground lining-nums">
-                                    {formatTime(timeLeft)}
+                                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Backend Core</span>
+                                <div className="text-3xl font-black text-foreground">
+                                    DATA INTEGRITY
                                 </div>
+                                <p className="text-[11px] font-bold text-muted-foreground mt-1">철저한 데이터 정합성 보장</p>
                             </div>
                             <div className="w-px h-12 bg-border hidden sm:block" />
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">현재 잔여 수량</span>
-                                <div className="text-4xl font-black text-primary">
-                                    12<span className="text-lg text-muted-foreground ml-1">/ 50</span>
+                                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Concurrency</span>
+                                <div className="text-3xl font-black text-foreground">
+                                    DISTRIBUTED LOCK
                                 </div>
+                                <p className="text-[11px] font-bold text-muted-foreground mt-1">Redis 분산 락 동시성 제어</p>
+                            </div>
+                            <div className="w-px h-12 bg-border hidden sm:block" />
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">Security</span>
+                                <div className="text-3xl font-black text-foreground">
+                                    JWT & RTR
+                                </div>
+                                <p className="text-[11px] font-bold text-muted-foreground mt-1">보안 인증 및 토큰 로테이션</p>
                             </div>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-6">
                             <Link
-                                href="/deal"
+                                href="/store"
                                 className="group relative inline-flex items-center justify-center gap-3 h-14 px-10 rounded-full bg-primary text-primary-foreground font-black text-lg transition-all hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 overflow-hidden"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
-                                    <Tag className="w-5 h-5" />
-                                    선착순 특별가로 구매하기
+                                    <ShoppingBag className="w-5 h-5" />
+                                    지금 스토어 둘러보기
                                 </span>
                                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                             </Link>
-                            <Link
-                                href="/store"
-                                className="inline-flex items-center justify-center gap-2 h-14 px-10 rounded-full border border-border bg-secondary/50 backdrop-blur-xl text-foreground font-bold hover:bg-secondary transition-all text-lg"
-                            >
-                                제품 상세 보기
-                                <ArrowRight className="w-5 h-5" />
-                            </Link>
                         </div>
 
-                        <div className="flex items-center gap-6 pt-8 text-xs font-bold text-muted-foreground uppercase tracking-widest border-t border-border/50 w-fit">
-                            <div className="flex items-center gap-2">
-                                <ShieldCheck className="w-4 h-4 text-primary" />
-                                100% 정품 보장
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Timer className="w-4 h-4 text-primary" />
-                                선착순 실시간 집계
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -165,10 +138,11 @@ export default function Home() {
                                             </div>
                                         )}
                                         <Image
-                                            src={item.imageUrl || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop'}
-                                            alt={item.name}
+                                            src={(item.imageUrl && item.imageUrl.trim() !== "") ? item.imageUrl : 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop'}
+                                            alt={item.name || "Product Image"}
                                             fill
                                             className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                            unoptimized={!item.imageUrl}
                                         />
                                         <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors" />
                                         <button className="absolute bottom-4 right-4 p-3 rounded-full bg-background/80 backdrop-blur-md text-foreground opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-xl">

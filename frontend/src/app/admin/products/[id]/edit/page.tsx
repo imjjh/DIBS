@@ -22,7 +22,7 @@ import { imageService } from '@/services/imageService';
 import { ProductStatus } from '@/types';
 import { useRef } from 'react';
 
-export default function EditProductPage() {
+export default function AdminEditProductPage() {
     const router = useRouter();
     const params = useParams();
     const id = Number(params.id);
@@ -83,7 +83,7 @@ export default function EditProductPage() {
             } catch (error) {
                 console.error('Failed to fetch product:', error);
                 alert('상품 정보를 불러오는데 실패했습니다.');
-                router.push('/seller/products');
+                router.push('/admin/products');
             } finally {
                 setIsLoading(false);
             }
@@ -128,7 +128,7 @@ export default function EditProductPage() {
             };
             await productService.updateProduct(id, payload as any);
             alert('상품 정보가 수정되었습니다!');
-            router.push('/seller/products');
+            router.push('/admin/products');
         } catch (error: any) {
             console.error('Update failed:', error);
             const message = error.response?.data?.message || '상품 수정에 실패했습니다.';
@@ -159,8 +159,8 @@ export default function EditProductPage() {
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-bold uppercase tracking-widest">목록으로 돌아가기</span>
                     </button>
-                    <h2 className="text-4xl font-black tracking-tighter text-slate-900">상품 정보 수정</h2>
-                    <p className="text-slate-500 font-medium">상품의 정보를 수정하고 노출 상태를 관리하세요.</p>
+                    <h2 className="text-4xl font-black tracking-tighter text-slate-900">상품 정보 수정 (Admin)</h2>
+                    <p className="text-slate-500 font-medium">관리자 권한으로 상품 정보를 수정합니다.</p>
                 </div>
             </div>
 
@@ -341,7 +341,7 @@ export default function EditProductPage() {
                                 className="flex-1 py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-70"
                             >
                                 {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
-                                정보 수정하기
+                                수정사항 저장하기
                             </button>
                             <button
                                 type="button"

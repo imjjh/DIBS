@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Store, LayoutDashboard, Package, ShoppingCart, LogOut, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { Header } from '@/components/common/Header';
 
 export default function SellerLayout({
     children,
@@ -48,37 +49,35 @@ export default function SellerLayout({
     }
 
     const menuItems = [
-        { name: '대시보드', href: '/seller', icon: <LayoutDashboard className="w-5 h-5" /> },
-        { name: '상품 관리', href: '/seller/products', icon: <Package className="w-5 h-5" /> },
-        { name: '주문 관리', href: '/seller/orders', icon: <ShoppingCart className="w-5 h-5" /> },
+        { name: '상품 관리', href: '/seller', icon: <Package className="w-5 h-5" /> },
     ];
 
     return (
-        <div className="flex min-h-screen bg-[#0a0a0b] text-white">
+        <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 selection:bg-indigo-500/10">
             {/* Sidebar */}
-            <aside className="w-72 border-r border-white/5 bg-[#0e0e10] flex flex-col">
-                <div className="p-8 border-b border-white/5">
+            <aside className="w-72 border-r border-slate-200 bg-white flex flex-col h-full shrink-0 z-20">
+                <div className="p-8 border-b border-slate-100">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
                             <Store className="w-6 h-6 text-white" />
                         </div>
-                        <h1 className="text-2xl font-black tracking-tighter text-white">Seller Center</h1>
+                        <h1 className="text-2xl font-black tracking-tighter text-slate-900">Seller Center</h1>
                     </Link>
                 </div>
 
-                <nav className="flex-1 p-6 space-y-2">
-                    <p className="px-4 py-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Management</p>
+                <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
+                    <p className="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Management</p>
                     {menuItems.map((item) => (
                         <Link key={item.name} href={item.href}>
                             <button className={cn(
                                 "w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold transition-all group",
                                 pathname === item.href
-                                    ? "bg-indigo-500 text-white shadow-xl shadow-indigo-500/10"
-                                    : "text-white/50 hover:text-white hover:bg-white/5"
+                                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-500/20"
+                                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                             )}>
                                 <span className={cn(
                                     "transition-colors",
-                                    pathname === item.href ? "text-white" : "group-hover:text-indigo-400"
+                                    pathname === item.href ? "text-white" : "group-hover:text-indigo-600"
                                 )}>
                                     {item.icon}
                                 </span>
@@ -88,22 +87,25 @@ export default function SellerLayout({
                     ))}
                 </nav>
 
-                <div className="p-6 border-t border-white/5 space-y-4">
+                <div className="p-6 border-t border-slate-100 space-y-4">
                     <Link href="/store">
-                        <button className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold text-white/50 hover:text-white hover:bg-white/5 transition-all">
-                            <ArrowLeft className="w-5 h-5" />
+                        <button className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all group">
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                             스토어로 돌아가기
                         </button>
                     </Link>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-auto bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/[0.03] via-transparent to-transparent">
-                <div className="p-12 max-w-7xl mx-auto">
-                    {children}
-                </div>
-            </main>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col overflow-hidden relative">
+                <Header className="lg:absolute lg:left-0 lg:w-full" />
+                <main className="flex-1 overflow-y-auto bg-slate-50">
+                    <div className="p-12 max-w-7xl mx-auto">
+                        {children}
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }

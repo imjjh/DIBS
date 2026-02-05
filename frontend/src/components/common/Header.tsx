@@ -3,16 +3,18 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ShoppingBag, User, Menu, LogOut, Sun, Moon, Zap, Trophy, Ticket, Store, ShieldCheck } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, LogOut, Zap, Trophy, Ticket, Store, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useTheme } from "next-themes";
 import { cn } from '@/lib/utils';
 
-export function Header() {
+interface HeaderProps {
+    className?: string;
+}
+
+export function Header({ className }: HeaderProps) {
     const router = useRouter();
     const pathname = usePathname();
     const { isAuthenticated, user, logout, checkAuth } = useAuthStore();
-    const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -32,13 +34,9 @@ export function Header() {
         router.push('/');
     };
 
-    const toggleTheme = () => {
-        setTheme(theme === "dark" ? "light" : "dark");
-    };
 
     const navItems = [
         { name: '스토어', href: '/store', icon: <ShoppingBag className="w-4 h-4" /> },
-        { name: '내 쿠폰', href: '/coupons', icon: <Ticket className="w-4 h-4" /> },
     ];
 
     // Special roles links
@@ -49,7 +47,8 @@ export function Header() {
         <div className="h-24 sm:h-24"> {/* Header placeholder to prevent layout jump */}
             <header className={cn(
                 "fixed top-0 z-50 w-full transition-all duration-300",
-                isScrolled ? "bg-background/80 backdrop-blur-xl border-b border-border py-2" : "bg-transparent py-4"
+                isScrolled ? "bg-background/80 backdrop-blur-xl border-b border-border py-2" : "bg-transparent py-4",
+                className
             )}>
                 <div className="container mx-auto flex h-16 items-center justify-between px-4">
                     {/* ... (rest of the header remains same) ... */}
@@ -112,15 +111,6 @@ export function Header() {
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                         <div className="hidden sm:flex items-center gap-2 mr-2">
-                            {mounted && (
-                                <button
-                                    onClick={toggleTheme}
-                                    className="p-3 rounded-2xl hover:bg-secondary transition-all active:scale-90"
-                                    aria-label="Toggle Theme"
-                                >
-                                    {theme === "dark" ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-blue-500" />}
-                                </button>
-                            )}
                             <button className="p-3 hover:bg-secondary rounded-2xl transition-all active:scale-90" aria-label="Search">
                                 <Search className="w-5 h-5" />
                             </button>

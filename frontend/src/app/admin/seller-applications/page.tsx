@@ -79,106 +79,106 @@ export default function AdminSellerApplications() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight mb-2">판매자 신청 관리</h1>
-                    <p className="text-muted-foreground font-medium">입점 신청한 판매자들의 정보를 검토하고 승인하세요.</p>
+                    <h1 className="text-4xl font-black tracking-tight mb-2 text-slate-900">판매자 신청 관리</h1>
+                    <p className="text-slate-500 font-medium">입점 신청한 판매자들의 정보를 검토하고 승인하세요.</p>
                 </div>
             </div>
 
             {/* Stats Overview (Mini) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-secondary/20 border border-border p-6 rounded-[2rem] flex items-center gap-4">
-                    <div className="p-3 bg-amber-500/10 text-amber-500 rounded-2xl">
+                <div className="bg-white border border-slate-200 p-6 rounded-[2rem] flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-amber-50 text-amber-500 rounded-2xl">
                         <Loader2 className="w-6 h-6 animate-spin" />
                     </div>
                     <div>
-                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Pending</p>
-                        <p className="text-2xl font-black">심사 대기중</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Pending</p>
+                        <p className="text-2xl font-black text-slate-900">심사 대기중</p>
                     </div>
                 </div>
-                <div className="bg-secondary/20 border border-border p-6 rounded-[2rem] flex items-center gap-4">
-                    <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl">
+                <div className="bg-white border border-slate-200 p-6 rounded-[2rem] flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-emerald-50 text-emerald-500 rounded-2xl">
                         <Check className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Approved</p>
-                        <p className="text-2xl font-black">매일 성장중</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Approved</p>
+                        <p className="text-2xl font-black text-slate-900">매일 성장중</p>
                     </div>
                 </div>
-                <div className="bg-secondary/20 border border-border p-6 rounded-[2rem] flex items-center gap-4">
-                    <div className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl">
+                <div className="bg-white border border-slate-200 p-6 rounded-[2rem] flex items-center gap-4 shadow-sm">
+                    <div className="p-3 bg-indigo-50 text-indigo-500 rounded-2xl">
                         <AlertCircle className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Note</p>
-                        <p className="text-sm font-bold text-muted-foreground">신중하게 검토하세요.</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Note</p>
+                        <p className="text-sm font-bold text-slate-400">신중하게 검토하세요.</p>
                     </div>
                 </div>
             </div>
 
             {/* Applications Table */}
-            <div className="bg-background border border-border rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/5">
-                <div className="p-8 border-b border-border bg-secondary/5 flex items-center justify-between">
+            <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="p-8 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-primary text-primary-foreground rounded-xl">
+                        <div className="p-2.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/20">
                             <Store className="w-5 h-5" />
                         </div>
-                        <span className="font-black tracking-tight">신청 목록</span>
+                        <span className="font-black tracking-tight text-slate-900">신청 목록</span>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-secondary/5 text-muted-foreground border-b border-border">
-                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">ID</th>
-                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">User ID</th>
-                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">상호명</th>
-                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">사업자 번호</th>
-                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">상태</th>
-                                <th className="px-8 py-5 text-xs font-black uppercase tracking-widest">액션</th>
+                            <tr className="bg-slate-50 text-slate-400 border-b border-slate-100">
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">ID</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">User ID</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">상호명</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">사업자 번호</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">상태</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">액션</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
+                        <tbody className="divide-y divide-slate-100">
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} className="px-8 py-20 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <Loader2 className="w-10 h-10 animate-spin text-primary opacity-20" />
-                                            <p className="text-sm font-black text-muted-foreground">데이터를 불러오는 중...</p>
+                                            <p className="text-sm font-black text-slate-300">데이터를 불러오는 중...</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : applications.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-8 py-20 text-center">
-                                        <p className="text-sm font-black text-muted-foreground">신청 내역이 없습니다.</p>
+                                        <p className="text-sm font-black text-slate-300">신청 내역이 없습니다.</p>
                                     </td>
                                 </tr>
                             ) : (
                                 applications.map((app) => (
-                                    <tr key={app.id} className="hover:bg-secondary/5 transition-colors group">
-                                        <td className="px-8 py-6 font-black text-sm">{app.id}</td>
-                                        <td className="px-8 py-6 font-bold text-muted-foreground text-sm">{app.userId}</td>
+                                    <tr key={app.id} className="hover:bg-slate-50 transition-colors group">
+                                        <td className="px-8 py-6 font-black text-sm text-slate-900">{app.id}</td>
+                                        <td className="px-8 py-6 font-bold text-slate-400 text-sm">{app.userId}</td>
                                         <td className="px-8 py-6">
-                                            <p className="font-black text-foreground">{app.businessName}</p>
+                                            <p className="font-black text-slate-900 group-hover:text-primary transition-colors">{app.businessName}</p>
                                         </td>
-                                        <td className="px-8 py-6 text-sm font-bold text-muted-foreground">{app.businessNumber}</td>
+                                        <td className="px-8 py-6 text-sm font-bold text-slate-400">{app.businessNumber}</td>
                                         <td className="px-8 py-6">
                                             <span className={cn(
                                                 "px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                                app.status === '대기 중' && "bg-amber-500/10 text-amber-500",
-                                                app.status === '승인' && "bg-emerald-500/10 text-emerald-500",
-                                                app.status === '거절' && "bg-rose-500/10 text-rose-500"
+                                                app.status === '대기 중' && "bg-amber-100 text-amber-600",
+                                                app.status === '승인' && "bg-emerald-100 text-emerald-600",
+                                                app.status === '거절' && "bg-red-100 text-red-600"
                                             )}>
                                                 {app.status}
                                             </span>
                                         </td>
                                         <td className="px-8 py-6">
                                             {app.status === '대기 중' && (
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button
                                                         onClick={() => handleApprove(app.id)}
-                                                        className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all active:scale-90"
+                                                        className="p-2 bg-emerald-100 text-emerald-600 rounded-xl hover:bg-emerald-500 hover:text-white transition-all active:scale-90"
                                                         title="승인"
                                                     >
                                                         <Check className="w-5 h-5" />
@@ -187,12 +187,10 @@ export default function AdminSellerApplications() {
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            console.log('Reject button clicked for app.id:', app.id);
-                                                            console.log('Setting rejectingId to:', app.id);
                                                             setRejectReason('');
                                                             setRejectingId(app.id);
                                                         }}
-                                                        className="p-2 bg-rose-500/10 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all active:scale-90"
+                                                        className="p-2 bg-red-100 text-red-600 rounded-xl hover:bg-red-500 hover:text-white transition-all active:scale-90"
                                                         title="거절"
                                                     >
                                                         <X className="w-5 h-5" />
@@ -200,7 +198,7 @@ export default function AdminSellerApplications() {
                                                 </div>
                                             )}
                                             {app.status === '거절' && app.rejectReason && (
-                                                <p className="text-xs text-rose-500 font-bold max-w-[150px] truncate" title={app.rejectReason}>
+                                                <p className="text-xs text-red-500 font-bold max-w-[150px] truncate" title={app.rejectReason}>
                                                     사유: {app.rejectReason}
                                                 </p>
                                             )}
@@ -213,22 +211,22 @@ export default function AdminSellerApplications() {
                 </div>
 
                 {/* Pagination */}
-                <div className="p-8 border-t border-border flex items-center justify-between bg-secondary/5">
-                    <p className="text-sm font-bold text-muted-foreground">
-                        Page <span className="font-black text-foreground">{page + 1}</span> of <span className="font-black text-foreground">{totalPages || 1}</span>
+                <div className="p-8 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+                    <p className="text-sm font-bold text-slate-400">
+                        Page <span className="font-black text-slate-900">{page + 1}</span> of <span className="font-black text-slate-900">{totalPages || 1}</span>
                     </p>
                     <div className="flex items-center gap-2">
                         <button
                             disabled={page === 0}
                             onClick={() => setPage(page - 1)}
-                            className="p-3 border border-border rounded-xl hover:bg-background disabled:opacity-30 transition-all active:scale-90"
+                            className="p-3 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 disabled:opacity-30 transition-all active:scale-90 shadow-sm"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
                         <button
                             disabled={page + 1 >= totalPages}
                             onClick={() => setPage(page + 1)}
-                            className="p-3 border border-border rounded-xl hover:bg-background disabled:opacity-30 transition-all active:scale-90"
+                            className="p-3 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 disabled:opacity-30 transition-all active:scale-90 shadow-sm"
                         >
                             <ChevronRight className="w-5 h-5" />
                         </button>
@@ -236,20 +234,20 @@ export default function AdminSellerApplications() {
                 </div>
             </div>
 
-            {/* Reject Modal (Simple Overlay) */}
+            {/* Reject Modal */}
             {rejectingId && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-                    <div className="bg-background border border-border p-10 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] space-y-8 animate-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-white border border-slate-200 p-10 rounded-[2.5rem] w-full max-w-lg shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
                         <div>
-                            <h2 className="text-3xl font-black tracking-tight mb-2">거절 사유 입력</h2>
-                            <p className="text-muted-foreground text-sm font-medium">판매자에게 전달될 거절 사유를 입력해주세요.</p>
+                            <h2 className="text-3xl font-black tracking-tight mb-2 text-slate-900">거절 사유 입력</h2>
+                            <p className="text-slate-500 text-sm font-medium">판매자에게 전달될 거절 사유를 입력해주세요.</p>
                         </div>
 
                         <textarea
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
                             placeholder="예: 사업자 정보가 올바르지 않습니다."
-                            className="w-full h-32 bg-secondary/20 border border-border rounded-2xl p-6 text-sm font-bold placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+                            className="w-full h-32 bg-slate-50 border border-slate-200 rounded-2xl p-6 text-sm font-bold placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all resize-none text-slate-900"
                         />
 
                         <div className="flex gap-4">
@@ -258,13 +256,13 @@ export default function AdminSellerApplications() {
                                     setRejectingId(null);
                                     setRejectReason('');
                                 }}
-                                className="flex-1 py-4 border border-border font-black rounded-2xl hover:bg-secondary transition-all active:scale-95"
+                                className="flex-1 py-4 border border-slate-200 font-black rounded-2xl hover:bg-slate-50 transition-all active:scale-95 text-slate-600"
                             >
                                 취소
                             </button>
                             <button
                                 onClick={() => handleReject(rejectingId)}
-                                className="flex-1 py-4 bg-rose-500 text-white font-black rounded-2xl hover:bg-rose-600 transition-all active:scale-95 shadow-lg shadow-rose-500/20"
+                                className="flex-1 py-4 bg-red-500 text-white font-black rounded-2xl hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20"
                             >
                                 거절 확정
                             </button>

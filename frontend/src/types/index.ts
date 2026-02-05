@@ -100,33 +100,62 @@ export interface UserCoupon {
 }
 
 export enum OrderStatus {
+    PENDING = 'PENDING',
     PAYMENT_COMPLETED = 'PAYMENT_COMPLETED',
     SHIPPING = 'SHIPPING',
     DELIVERED = 'DELIVERED',
     CANCELLED = 'CANCELLED'
 }
 
-export interface Order {
-    id: number;
-    buyerId: number;
-    totalPrice: number;
-    discountPrice: number;
-    usedPoints: number;
-    earnPoints: number;
-    finalPrice: number;
-    status: OrderStatus;
-    deliveryAt?: string;
-    orderItems: OrderItem[];
+export interface OrderItemSimpleResponse {
+    productId: number;
+    productName: string;
+    productImageUrl: string;
+    quantity: number;
+    price: number;
 }
 
-export interface OrderItem {
+export interface OrderSimpleResponse {
     id: number;
-    orderId: number;
-    productId: number;
-    orderPrice: number;
-    count: number;
-    product?: Product; // Included for convenience
+    orderName: string;
+    totalPrice: number;
+    status: OrderStatus;
+    orderedAt: string;
+    representativeImageUrl?: string;
 }
+
+export interface OrderItemDetailResponse {
+    productId: number;
+    productName: string;
+    price: number;
+    quantity: number;
+    imageUrl: string;
+    stockQuantity: number;
+    productStatus: ProductStatus;
+}
+
+export interface OrderDetailResponse {
+    orderId: number;
+    orderName: string;
+    orderedAt: string;
+    status: OrderStatus;
+    totalPrice: number;
+    recipientName: string;
+    recipientPhone: string;
+    shippingAddress: string;
+    shippingAddressDetail: string;
+    zipCode: string;
+    deliveryMemo?: string;
+    orderItems: OrderItemDetailResponse[];
+}
+
+export interface OrderSearchRequest {
+    page?: number;
+    size?: number;
+    // Add other search fields if OrderSearchRequestDto has them
+}
+
+export interface OrderListResponse extends PagedResponse<OrderSimpleResponse> { }
 
 export interface CartItem {
     id: number; // Cart ID or Product ID depending on implementation

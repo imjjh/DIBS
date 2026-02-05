@@ -4,40 +4,17 @@ export function Footer() {
     return (
         <footer className="w-full border-t border-border bg-secondary py-12">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="space-y-2 text-center md:text-left">
                         <h3 className="text-xl font-black text-primary tracking-tighter">DIBS<span className="text-foreground">!</span></h3>
-                        <p className="text-sm text-muted-foreground">
-                            놓치면 품절! 선착순 타임딜 쇼핑몰 딥스.
+                        <p className="text-xs text-muted-foreground">
+                            실시간 동시성 제어, 데이터 정합성 보장 그리고 보안에 집중한 이커머스 포트폴리오 프로젝트입니다.
                         </p>
                     </div>
 
-                    <div>
-                        <h4 className="font-semibold mb-4">쇼핑하기</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><span className="hover:text-foreground cursor-default">타임딜</span></li>
-                            <li><span className="hover:text-foreground cursor-default">베스트</span></li>
-                            <li><span className="hover:text-foreground cursor-default">쿠폰존</span></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 className="font-semibold mb-4">고객센터</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><span className="hover:text-foreground cursor-default">자주 묻는 질문</span></li>
-                            <li><span className="hover:text-foreground cursor-default">공지사항</span></li>
-                            <li><span className="hover:text-foreground cursor-default">1:1 문의</span></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 className="font-semibold mb-4">소셜 미디어</h4>
-                        <div className="flex gap-4">
-                            {/* Social Icons Placeholders */}
-                            <div className="w-8 h-8 bg-muted rounded-full"></div>
-                            <div className="w-8 h-8 bg-muted rounded-full"></div>
-                            <div className="w-8 h-8 bg-muted rounded-full"></div>
-                        </div>
+                    <div className="flex gap-8 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                        <Link href="/store" className="hover:text-primary transition-colors">Store</Link>
+                        <a href="https://github.com/imjjh/DIBS" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Github</a>
                     </div>
                 </div>
 

@@ -4,12 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     Search,
-    Filter,
     ShoppingCart,
     Zap,
     ChevronDown,
-    Grid as GridIcon,
-    List as ListIcon,
     TrendingUp,
     Clock,
     Flame,
@@ -30,7 +27,6 @@ export default function StorePage() {
     const [selectedCategory, setSelectedCategory] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
     const [submittedSearchQuery, setSubmittedSearchQuery] = useState("");
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [mounted, setMounted] = useState(false);
     const [hasMore, setHasMore] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -112,8 +108,6 @@ export default function StorePage() {
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-3xl space-y-4">
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="w-12 h-1 bg-primary rounded-full" />
-                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">공식 스토어</span>
                         </div>
                         <h1 className="text-6xl font-black tracking-tighter leading-none mb-6">
                             최고의 <span className="text-primary italic">선택</span>, 최상의 브랜드
@@ -141,27 +135,6 @@ export default function StorePage() {
                             >
                                 검색
                             </button>
-                        </div>
-                        <div className="flex gap-2">
-                            <button className="px-6 py-4 border border-border rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-secondary transition-all">
-                                <Filter className="w-4 h-4" />
-                                필터
-                                <ChevronDown className="w-4 h-4 opacity-30" />
-                            </button>
-                            <div className="hidden md:flex bg-secondary/20 p-1.5 rounded-2xl border border-border gap-1">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={cn("p-2.5 rounded-xl transition-all", viewMode === 'grid' ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-                                >
-                                    <GridIcon className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={cn("p-2.5 rounded-xl transition-all", viewMode === 'list' ? "bg-background shadow-sm text-primary" : "text-muted-foreground")}
-                                >
-                                    <ListIcon className="w-4 h-4" />
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -198,17 +171,10 @@ export default function StorePage() {
                     {/* Main Content: Product Grid */}
                     <main className="lg:col-span-10">
                         <div className="flex items-center justify-between mb-8">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-black text-foreground">인기 상품 순</span>
-                                <ChevronDown className="w-4 h-4 opacity-30" />
-                            </div>
                             <p className="text-xs font-bold text-muted-foreground">함께 찾은 아이템: <span className="text-foreground">{totalElements}개</span></p>
                         </div>
 
-                        <div className={cn(
-                            "grid gap-8",
-                            viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
-                        )}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {products.length > 0 ? (
                                 products.map((product) => (
                                     <Link
@@ -271,16 +237,6 @@ export default function StorePage() {
                                                 )}
                                             </div>
 
-                                            {/* Dynamic Badges */}
-                                            <div className="flex items-center gap-3 pt-2">
-                                                <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
-                                                    <Clock className="w-3 h-3" /> 한정 입고
-                                                </div>
-                                                <div className="w-1 h-1 bg-border rounded-full" />
-                                                <div className="flex items-center gap-1 text-[10px] font-bold text-orange-500">
-                                                    <ShoppingBag className="w-3 h-3" /> 매진 임박
-                                                </div>
-                                            </div>
                                         </div>
                                     </Link>
                                 ))

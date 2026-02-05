@@ -143,18 +143,6 @@ export default function SignupPage() {
                     </div>
                 </div>
 
-                {/* Welcome Coupon Banner */}
-                <div className="mb-8 p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-4 animate-in zoom-in duration-500">
-                    <div className="bg-primary/10 p-3 rounded-xl">
-                        <Ticket className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-0.5" >Welcome Gift</p>
-                        <p className="text-sm font-black text-foreground">
-                            지금 가입하면 <span className="text-primary text-base">10,000원</span> 쿠폰 즉시 지급!
-                        </p>
-                    </div>
-                </div>
 
                 {(error || localError) && (
                     <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-center gap-3 text-destructive animate-in slide-in-from-top-2">

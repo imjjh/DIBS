@@ -20,17 +20,40 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
 import SellerOnboarding from '@/components/seller/SellerOnboarding';
+import { orderService } from '@/services/orderService';
 
 export default function MyPage() {
     const { user, isAuthenticated, logout, checkAuth } = useAuthStore();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'ORDERS' | 'COUPONS' | 'POINTS'>('ORDERS');
+    const [activeTab, setActiveTab] = useState<'ORDERS'>('ORDERS');
     const [mounted, setMounted] = useState(false);
+
+    // Order State
+    const [orders, setOrders] = useState<any[]>([]);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
     useEffect(() => {
         checkAuth();
         setMounted(true);
     }, [checkAuth]);
+
+    useEffect(() => {
+        if (isAuthenticated && mounted) {
+            fetchOrders();
+        }
+    }, [isAuthenticated, mounted]);
+
+    const fetchOrders = async () => {
+        try {
+            setIsLoadingOrders(true);
+            const response = await orderService.searchOrders({ page: 0, size: 20 });
+            setOrders(response.items);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoadingOrders(false);
+        }
+    };
 
     if (!mounted) return null;
 
@@ -78,21 +101,12 @@ export default function MyPage() {
                                     </span>
                                 </div>
                             </div>
-                            <button className="absolute -bottom-2 -right-2 p-3 bg-background border border-border rounded-2xl shadow-xl hover:bg-secondary transition-all active:scale-90">
-                                <Settings className="w-5 h-5 text-foreground" />
-                            </button>
                         </div>
 
                         {/* User Metadata */}
                         <div className="flex-1 text-center md:text-left space-y-3">
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                 <h1 className="text-5xl font-black tracking-tighter">{user?.nickname || user?.name || '회원님'}</h1>
-                                <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-                                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                                    <span className="text-[10px] font-black text-primary uppercase tracking-widest leading-none">
-                                        Diamond Member
-                                    </span>
-                                </div>
                             </div>
                             <p className="text-muted-foreground text-lg font-medium opacity-80">{user?.email}</p>
 
@@ -101,61 +115,21 @@ export default function MyPage() {
                                 <div className="bg-background/40 backdrop-blur-md border border-border/80 p-6 rounded-[2.5rem] group hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-pointer">
                                     <div className="flex items-center gap-4 mb-3">
                                         <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                            <Wallet className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Points</span>
-                                    </div>
-                                    <p className="text-3xl font-black">{user?.points?.toLocaleString() || 850}<span className="text-sm ml-1 text-muted-foreground">P</span></p>
-                                </div>
-
-                                <div className="bg-background/40 backdrop-blur-md border border-border/80 p-6 rounded-[2.5rem] group hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-pointer">
-                                    <div className="flex items-center gap-4 mb-3">
-                                        <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                            <Ticket className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Coupons</span>
-                                    </div>
-                                    <p className="text-3xl font-black">12<span className="text-sm ml-1 text-muted-foreground">장</span></p>
-                                </div>
-
-                                <div className="hidden lg:block bg-background/40 backdrop-blur-md border border-border/80 p-6 rounded-[2.5rem] group hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-pointer">
-                                    <div className="flex items-center gap-4 mb-3">
-                                        <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                                             <Package className="w-5 h-5" />
                                         </div>
-                                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Active Orders</span>
+                                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Orders</span>
                                     </div>
-                                    <p className="text-3xl font-black">2<span className="text-sm ml-1 text-muted-foreground">건</span></p>
-                                </div>
-
-                                <div className="hidden lg:block bg-background/40 backdrop-blur-md border border-border/80 p-6 rounded-[2.5rem] group hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-pointer">
-                                    <div className="flex items-center gap-4 mb-3">
-                                        <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                            <Bell className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Alerts</span>
-                                    </div>
-                                    <p className="text-3xl font-black">4<span className="text-sm ml-1 text-muted-foreground">개</span></p>
+                                    <p className="text-3xl font-black">{orders.length}<span className="text-sm ml-1 text-muted-foreground">건</span></p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Top Right Action Cell */}
-                        <div className="flex flex-col gap-3 shrink-0">
-                            <button
-                                onClick={handleLogout}
-                                className="px-8 py-4 border border-border rounded-2xl text-sm font-black text-muted-foreground hover:text-red-500 hover:bg-red-500/5 hover:border-red-500/30 transition-all flex items-center justify-center gap-3 group active:scale-95"
-                            >
-                                <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                                로그아웃
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Content Body */}
-            <div className="container mx-auto px-4 -mt-12">
+            <div className="container mx-auto px-4 -mt-10 relative z-20">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
                     {/* Activity Section */}
@@ -163,129 +137,79 @@ export default function MyPage() {
                         <div className="bg-background border border-border rounded-[3rem] overflow-hidden shadow-2xl shadow-primary/5">
                             {/* Tab Navigation */}
                             <div className="flex border-b border-border bg-secondary/5 p-3">
-                                {[
-                                    { id: 'ORDERS', label: '주문 전체보기', icon: <ShoppingBag className="w-4 h-4" /> },
-                                    { id: 'COUPONS', label: '내 쿠폰함', icon: <Ticket className="w-4 h-4" /> },
-                                    { id: 'POINTS', label: '포인트 적립 내역', icon: <Wallet className="w-4 h-4" /> },
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id as any)}
-                                        className={cn(
-                                            "flex-1 flex items-center justify-center gap-3 py-5 text-sm font-black transition-all rounded-[1.8rem]",
-                                            activeTab === tab.id
-                                                ? "bg-background text-primary shadow-lg shadow-primary/5"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-background/80"
-                                        )}
-                                    >
-                                        {tab.icon}
-                                        {tab.label}
-                                    </button>
-                                ))}
+                                <div className="flex-1 flex items-center justify-center gap-3 py-5 text-sm font-black text-primary bg-background rounded-[1.8rem] shadow-lg shadow-primary/5">
+                                    <ShoppingBag className="w-4 h-4" />
+                                    주문 전체보기
+                                </div>
                             </div>
 
                             {/* View Content */}
                             <div className="p-10">
                                 {activeTab === 'ORDERS' && (
-                                    <div className="space-y-8">
-                                        {/* Mock Shipment Status Row */}
-                                        <div className="grid grid-cols-3 gap-6 mb-12">
-                                            {[
-                                                { label: '결제완료', count: 1, color: 'text-blue-500' },
-                                                { label: '배송중', count: 2, color: 'text-orange-500' },
-                                                { label: '배송완료', count: 14, color: 'text-green-500' },
-                                            ].map((status) => (
-                                                <div key={status.label} className="text-center p-6 bg-secondary/10 rounded-3xl">
-                                                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">{status.label}</p>
-                                                    <p className={cn("text-3xl font-black", status.color)}>{status.count}</p>
-                                                </div>
-                                            ))}
-                                        </div>
+                                    <>
+                                        {isLoadingOrders ? (
+                                            <div className="py-20 text-center animate-pulse">
+                                                <div className="w-16 h-16 bg-secondary rounded-full mx-auto mb-4" />
+                                                <div className="h-4 bg-secondary w-1/3 mx-auto rounded" />
+                                            </div>
+                                        ) : orders.length > 0 ? (
+                                            <div className="space-y-6">
+                                                {orders.map((order) => (
+                                                    <div key={order.id} className="group relative bg-card hover:bg-secondary/10 border border-border rounded-[2rem] p-6 transition-all hover:shadow-lg flex flex-col gap-4">
+                                                        <div className="flex items-center justify-between border-b border-border pb-4">
+                                                            <div>
+                                                                <span className="text-xs font-bold text-muted-foreground mb-1 block">
+                                                                    {new Date(order.orderedAt).toLocaleDateString()}
+                                                                </span>
+                                                                <h4 className="text-xl font-black tracking-tight">{order.orderName}</h4>
+                                                            </div>
+                                                            <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
+                                                                {order.status}
+                                                            </div>
+                                                        </div>
 
-                                        {/* Recent Order Item */}
-                                        <div className="space-y-5">
-                                            <div className="flex items-center justify-between border-b border-border pb-4">
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-sm font-black text-foreground">2024.12.19 (금)</span>
-                                                    <span className="text-sm font-bold text-muted-foreground">주문번호 20241219-0012491</span>
-                                                </div>
-                                                <Link href="#" className="text-sm font-black text-primary flex items-center gap-1 group">
-                                                    주문 상세 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                        {/* Order Items Preview (Representative Style) */}
+                                                        <div className="flex gap-4 items-center">
+                                                            <div className="w-20 h-20 rounded-xl bg-secondary overflow-hidden shrink-0 border border-border/50">
+                                                                {order.representativeImageUrl ? (
+                                                                    <img src={order.representativeImageUrl} alt={order.orderName} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center bg-secondary/50">
+                                                                        <ShoppingBag className="w-8 h-8 text-muted-foreground/50" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0 py-1">
+                                                                <h5 className="font-bold text-lg truncate mb-1">{order.orderName}</h5>
+                                                                <p className="text-sm font-medium text-muted-foreground">
+                                                                    {/* Additional info if needed */}
+                                                                    주문번호 #{order.id}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between pt-4 border-t border-border mt-2">
+                                                            <div className="text-lg font-black">
+                                                                {(order.totalPrice).toLocaleString()}<span className="text-sm font-medium ml-1">원</span>
+                                                            </div>
+                                                            <Link href={`/orders/${order.id}`} className="px-5 py-2 bg-secondary text-secondary-foreground text-sm font-bold rounded-xl hover:bg-secondary/80">
+                                                                상세보기
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="py-20 text-center bg-secondary/5 rounded-[2.5rem] border border-dashed border-border/50">
+                                                <Package className="w-16 h-16 mx-auto mb-6 text-muted-foreground opacity-20" />
+                                                <h3 className="text-2xl font-black mb-2 tracking-tight">주문 내역이 없습니다</h3>
+                                                <p className="text-muted-foreground font-medium mb-8">DIBS!에서 첫 번째 아이템을 주문해보세요.</p>
+                                                <Link href="/store" className="px-8 py-3 bg-primary text-primary-foreground font-black rounded-2xl hover:shadow-lg transition-all active:scale-95">
+                                                    스토어 바로가기
                                                 </Link>
                                             </div>
-
-                                            <div className="flex flex-col md:flex-row gap-8 py-4">
-                                                <div className="w-full md:w-32 aspect-square bg-muted rounded-3xl overflow-hidden shadow-2xl shadow-black/10 group cursor-pointer">
-                                                    <img
-                                                        src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop"
-                                                        alt="Sneakers"
-                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 flex flex-col justify-center space-y-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="px-3 py-1 bg-orange-500/10 text-orange-500 text-[10px] font-black rounded-lg uppercase tracking-widest">배송중</span>
-                                                        <span className="text-sm text-foreground font-black">CJ대한통운 5102-1249-1234</span>
-                                                    </div>
-                                                    <h3 className="text-2xl font-black tracking-tight leading-tight">DIBS! Limited Prime Sneakers - Midnight Navy</h3>
-                                                    <p className="text-muted-foreground font-bold text-lg">189,000원 | 1개</p>
-
-                                                    <div className="flex flex-wrap gap-3 mt-4">
-                                                        <button className="px-6 py-2.5 bg-primary text-primary-foreground text-sm font-black rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all">
-                                                            배송조회
-                                                        </button>
-                                                        <button className="px-6 py-2.5 border border-border text-sm font-black rounded-xl hover:bg-secondary transition-all">
-                                                            문의하기
-                                                        </button>
-                                                        <button className="px-6 py-2.5 border border-border text-sm font-black rounded-xl hover:bg-red-500/5 hover:text-red-500 hover:border-red-500/30 transition-all">
-                                                            취소신청
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === 'COUPONS' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="relative overflow-hidden bg-primary p-8 rounded-[2.5rem] text-primary-foreground group cursor-pointer hover:shadow-2xl hover:shadow-primary/30 transition-all border border-white/10">
-                                            <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:rotate-12 transition-transform duration-500">
-                                                <Ticket className="w-24 h-24" />
-                                            </div>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">New Membership</span>
-                                            <h3 className="text-4xl font-black mb-1 tracking-tighter">10,000<span className="text-xl ml-1">원</span></h3>
-                                            <p className="text-sm font-black opacity-90">DIBS! 가입 환영 시크릿 쿠폰</p>
-                                            <div className="mt-8 pt-6 border-t border-white/20 flex flex-col gap-1">
-                                                <span className="text-[10px] font-black opacity-60">사용 조건: 5만원 이상 구매 시</span>
-                                                <span className="text-[10px] font-black uppercase tracking-[0.1em]">Valid: ~ 2025.01.19</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="relative overflow-hidden bg-slate-900 p-8 rounded-[2.5rem] text-white group cursor-pointer hover:shadow-2xl hover:shadow-black/30 transition-all border border-white/5">
-                                            <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:-rotate-12 transition-transform duration-500">
-                                                <Store className="w-24 h-24" />
-                                            </div>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">Store Special</span>
-                                            <h3 className="text-4xl font-black mb-1 tracking-tighter">15<span className="text-xl ml-1">%</span></h3>
-                                            <p className="text-sm font-black opacity-90">베스트 상품 기획전 할인권</p>
-                                            <div className="mt-8 pt-6 border-t border-white/20 flex flex-col gap-1">
-                                                <span className="text-[10px] font-black opacity-60">최대 할인 20,000원</span>
-                                                <span className="text-[10px] font-black uppercase tracking-[0.1em]">Valid: ~ 2024.12.31</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {activeTab === 'POINTS' && (
-                                    <div className="space-y-10">
-                                        <div className="bg-secondary/10 p-10 rounded-[2.5rem] text-center">
-                                            <Wallet className="w-20 h-20 mx-auto mb-6 text-primary opacity-30 shadow-2xl" />
-                                            <h3 className="text-3xl font-black mb-4 tracking-tight">소멸 예정 포인트: 0 P</h3>
-                                            <p className="text-muted-foreground font-bold text-lg mb-8 max-w-md mx-auto">차곡차곡 모인 포인트로 현금처럼 결제해보세요!</p>
-                                            <button className="px-8 py-3 bg-foreground text-background font-black rounded-2xl hover:opacity-90 transition-all">적립 혜택 보기</button>
-                                        </div>
-                                    </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -295,32 +219,6 @@ export default function MyPage() {
                     <div className="lg:col-span-4 space-y-8">
                         <SellerOnboarding />
 
-                        {/* Quick Utility Menu */}
-                        <div className="bg-background border border-border rounded-[3rem] p-6 space-y-3 shadow-xl shadow-black/5">
-                            <h3 className="px-6 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] leading-loose">Account Settings</h3>
-                            {[
-                                { name: '인증 및 보안 설정', icon: <ShieldCheck className="w-5 h-5" /> },
-                                { name: '결제 수단 / 간편결제', icon: <CreditCard className="w-5 h-5" /> },
-                                { name: '배송지 관리', icon: <Package className="w-5 h-5" /> },
-                                { name: '알림 / 메시지 설정', icon: <Bell className="w-5 h-5" />, toggle: true },
-                            ].map((item) => (
-                                <button key={item.name} className="w-full flex items-center justify-between p-5 hover:bg-secondary/50 rounded-2xl transition-all group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-muted-foreground group-hover:text-primary transition-colors">
-                                            {item.icon}
-                                        </div>
-                                        <span className="text-sm font-black text-foreground">{item.name}</span>
-                                    </div>
-                                    {item.toggle ? (
-                                        <div className="w-12 h-7 bg-primary rounded-full relative p-1.5 shadow-inner">
-                                            <div className="w-4 h-4 bg-white rounded-full absolute right-1.5" />
-                                        </div>
-                                    ) : (
-                                        <ChevronRight className="w-5 h-5 text-muted-foreground opacity-30 group-hover:opacity-100 transition-all group-hover:translate-x-1" />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
                     </div>
                 </div>
             </div>

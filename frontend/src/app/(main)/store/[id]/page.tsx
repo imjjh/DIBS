@@ -19,17 +19,40 @@ import {
 import { cn } from '@/lib/utils';
 import { productService } from '@/services/productService';
 import { cartService } from '@/services/cartService';
+import { orderService, OrderCreateRequest } from '@/services/orderService';
+import { useAuthStore } from '@/store/useAuthStore';
+import { AddressInput, ShippingInfo } from '@/components/common/AddressInput';
 import { ProductDetail, ProductStatus } from '@/types';
 
 export default function ProductDetailPage() {
     const params = useParams();
     const router = useRouter();
+    const { user, isAuthenticated } = useAuthStore();
     const id = Number(params.id);
 
     const [product, setProduct] = useState<ProductDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'qna'>('info');
+
+    const [isBuyNowModalOpen, setIsBuyNowModalOpen] = useState(false);
+    const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
+        recipientName: '',
+        recipientPhone: '',
+        zipCode: '',
+        shippingAddress: '',
+        shippingAddressDetail: '',
+        deliveryMemo: ''
+    });
+
+    useEffect(() => {
+        if (user) {
+            setShippingInfo((prev: ShippingInfo) => ({
+                ...prev,
+                recipientName: user.nickname || user.name || ''
+            }));
+        }
+    }, [user]);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -59,6 +82,11 @@ export default function ProductDetailPage() {
 
     const handleAddToCart = async () => {
         if (!product || isSubmitting) return;
+        if (!isAuthenticated) {
+            alert('로그인이 필요한 서비스입니다.');
+            router.push('/login');
+            return;
+        }
 
         try {
             setIsSubmitting(true);
@@ -72,15 +100,55 @@ export default function ProductDetailPage() {
             }
         } catch (error: any) {
             console.error("Cart Error Details:", error.response?.data || error.message);
-            alert("장바구니 담기에 실패했습니다.\n" + (error.response?.data?.message || "로그인 상태를 확인해주세요."));
+            const message = error.response?.status === 401
+                ? "로그인 세션이 만료되었습니다. 다시 로그인해주세요."
+                : (error.response?.data?.message || "장바구니 담기에 실패했습니다.");
+            alert(message);
+            if (error.response?.status === 401) router.push('/login');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-
     const handleBuyNow = () => {
-        alert('주문 페이지로 이동합니다.');
+        if (!product || isSubmitting) return;
+        if (!isAuthenticated) {
+            alert('로그인이 필요한 서비스입니다.');
+            router.push('/login');
+            return;
+        }
+        setIsBuyNowModalOpen(true);
+    };
+
+    const handleBuyNowSubmit = async () => {
+        if (!product || isSubmitting) return;
+
+        // Validation
+        if (!shippingInfo.recipientName || !shippingInfo.recipientPhone || !shippingInfo.shippingAddress || !shippingInfo.zipCode) {
+            alert('배송 정보를 모두 입력해주세요.');
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            const orderRequest: OrderCreateRequest = {
+                ...shippingInfo,
+                orderItems: [{
+                    productId: product.id,
+                    quantity: quantity
+                }]
+            };
+
+            await orderService.createOrder(orderRequest);
+            alert('주문이 성공적으로 완료되었습니다!');
+            setIsBuyNowModalOpen(false);
+            router.push('/mypage');
+        } catch (error: any) {
+            console.error("Order Error:", error.response?.data || error.message);
+            alert("주문 중 오류가 발생했습니다.\n" + (error.response?.data?.message || "다시 시도해주세요."));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (isLoading) {
@@ -155,33 +223,9 @@ export default function ProductDetailPage() {
                                         {product.discountRate}% OFF
                                     </div>
                                 )}
-                                <div className="px-5 py-2 bg-black text-white text-xs font-black rounded-2xl tracking-widest shadow-2xl">
-                                    LIMITED
-                                </div>
                             </div>
                         </div>
 
-                        {/* Summary Info Cards */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-secondary/30 p-6 rounded-[2.5rem] border border-border flex items-center gap-4">
-                                <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
-                                    <ShieldCheck className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Guaranteed</p>
-                                    <p className="text-xs font-black">100% 테넌트 정품</p>
-                                </div>
-                            </div>
-                            <div className="bg-secondary/30 p-6 rounded-[2.5rem] border border-border flex items-center gap-4">
-                                <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
-                                    <Truck className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Free Shipping</p>
-                                    <p className="text-xs font-black">DIBS! 무료 멤버십</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Right: Product Info & Actions */}
@@ -257,7 +301,7 @@ export default function ProductDetailPage() {
                                 <span>남은 수량: <span className="text-foreground tracking-tighter">{product.stockQuantity || 0}</span>개</span>
                                 <span className="w-1 h-1 bg-border rounded-full" />
                                 {product.status === ProductStatus.ON_SALE ? (
-                                    <span className="text-orange-500">현재 42명이 결제 대기 중</span>
+                                    <span>현재 구매 가능한 상품입니다.</span>
                                 ) : (
                                     <span>현재 구매가 불가능한 상태입니다.</span>
                                 )}
@@ -347,6 +391,47 @@ export default function ProductDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Buy Now Modal */}
+            {isBuyNowModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-2xl rounded-[2.5rem] p-8 md:p-10 shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black tracking-tight">배송지 입력</h2>
+                            <button
+                                onClick={() => setIsBuyNowModalOpen(false)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-8">
+                            <AddressInput
+                                value={shippingInfo}
+                                onChange={setShippingInfo}
+                            />
+
+                            <div className="flex gap-4 pt-4 border-t border-slate-100">
+                                <button
+                                    onClick={() => setIsBuyNowModalOpen(false)}
+                                    className="flex-1 py-4 bg-slate-100 text-slate-900 font-bold rounded-2xl hover:bg-slate-200 transition-colors"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={handleBuyNowSubmit}
+                                    disabled={isSubmitting}
+                                    className="flex-1 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+                                    {isSubmitting ? '처리중...' : '주문하기'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
