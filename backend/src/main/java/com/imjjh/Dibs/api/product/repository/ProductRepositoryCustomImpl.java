@@ -22,6 +22,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     /**
      * 일반 검색
+     * 
      * @param requestDto
      * @param pageable
      * @return
@@ -33,6 +34,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     /**
      * 판매자의 자신의 물품만 검색
+     * 
      * @param requestDto
      * @param sellerId
      * @param pageable
@@ -47,17 +49,16 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                                 productEntity.id,
                                 productEntity.name,
                                 productEntity.price,
+                                productEntity.stockQuantity,
                                 productEntity.status,
                                 productEntity.imageUrl,
                                 productEntity.category,
-                                productEntity.discountRate
-                        ))
+                                productEntity.discountRate))
                 .from(productEntity)
                 .where(
                         categoryEq(requestDto.category()),
                         keywordLike(requestDto.keyword()),
-                        sellerIdEq(sellerId)
-                )
+                        sellerIdEq(sellerId))
                 .orderBy(productEntity.id.desc())
                 .offset(pageable.getOffset()) // TODO: 커서 기반으로 수정 필요
                 .limit(pageable.getPageSize())
@@ -69,21 +70,20 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .where(
                         categoryEq(requestDto.category()),
                         keywordLike(requestDto.keyword()),
-                        sellerIdEq(sellerId)
-                )
+                        sellerIdEq(sellerId))
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
-
     private BooleanExpression categoryEq(String category) {
         return (category == null || category.isBlank()) ? null : productEntity.category.eq(category);
     }
 
-
     private BooleanExpression keywordLike(String keyword) {
-        return (keyword == null || keyword.isBlank()) ? null : productEntity.name.containsIgnoreCase(keyword).or(productEntity.description.containsIgnoreCase(keyword));
+        return (keyword == null || keyword.isBlank()) ? null
+                : productEntity.name.containsIgnoreCase(keyword)
+                        .or(productEntity.description.containsIgnoreCase(keyword));
     }
 
     private BooleanExpression sellerIdEq(Long sellerId) {
