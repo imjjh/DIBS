@@ -69,24 +69,4 @@ public class ProductController {
         productService.deleteProduct(userDetails, id);
         return ApiResponse.success();
     }
-
-    @PostMapping("/{id}/buy")
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "상품 구매")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Void> buyProduct(@AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("id") Long id) {
-        productService.buyProduct(userDetails, id);
-        return ApiResponse.success();
-    }
-
-    @PostMapping("/{id}/cart")
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "상품 장바구니 추가")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Void> addToCart(@AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("id") Long id) {
-        productService.addToCart(userDetails, id);
-        return ApiResponse.success();
-    }
 }

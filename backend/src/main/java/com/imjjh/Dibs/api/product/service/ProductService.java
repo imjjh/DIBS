@@ -124,7 +124,6 @@ public class ProductService {
         // 권한 검사
         productEntity.validateOwner(userDetails);
 
-
         // S3 삭제를 위한 URL
         String urlToDelete = productEntity.getImageUrl();
 
@@ -135,15 +134,4 @@ public class ProductService {
         s3Service.deleteImageFile(productEntity.getImageUrl());
 
     }
-
-    public void buyProduct(CustomUserDetails userDetails, Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buyProduct'");
-    }
-
-    public void addToCart(CustomUserDetails userDetails, Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addToCart'");
-    }
-
 }
