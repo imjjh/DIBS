@@ -1,5 +1,8 @@
 package com.imjjh.Dibs.config;
 
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +22,15 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
+    // Redisson 설정 추가
+    @Bean
+    public RedissonClient redissonClient() {
+        Config config = new Config();
+        config.useSingleServer()
+                .setAddress("redis://" + host + ":" + port);
+        return Redisson.create(config);
+    }
+
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(host, port);
@@ -26,8 +38,8 @@ public class RedisConfig {
 
     // (key, value) 직렬화 방식 지정
     @Bean
-    public RedisTemplate<String,Object>redisTemplate(){
-        RedisTemplate<String,Object> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate() {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
 
         // key, value를 일반 문자열로 저장히기 위한 serializer 설정

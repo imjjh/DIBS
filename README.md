@@ -11,8 +11,8 @@
 - **Core**: Spring Boot 3.4.1, Java 21
 - **Security**: Spring Security, OAuth2 Client, JWT (Access/Refresh Token)
 - **Database**: MySQL 8.4, Spring Data JPA
-- **Optimization**: **QueryDSL 5.0**, MapStruct 1.6.3, Swagger(SpringDoc) 2.8.5
-- **Infrastructure**: AWS S3, **AWS CloudFront (OAC)**, AWS EC2, Redis, Docker, Caddy, Github Actions (CI/CD)
+- **Optimization**: QueryDSL 5.0, MapStruct 1.6.3, Swagger(SpringDoc) 2.8.5
+- **Infrastructure**: AWS S3, AWS CloudFront (OAC), AWS EC2, Redis, Docker, Caddy
 
 ---
 
@@ -25,11 +25,9 @@
 
 ### 2. 판매자 센터 및 대시보드 (Seller Center)
 - [x] **판매자 온보딩**: 사업자 정보 등록 및 심사 로직 (Pending -> Approved/Rejected)
-- [ ] **인사이트 대시보드**: 누적 매출액, 등록 상품 수, 방문자 수 등 통계 요약
-- [ ] **상품 라이프사이클 관리 (CRUD)**:
+- [x] **상품 라이프사이클 관리 (CRUD)**:
   - [x] AWS S3 연동 실시간 이미지 업로드
   - [x] 카테고리별 상품 등록 및 수정/삭제
-  - [ ] **상품 상세 인사이트**: 조회수, 좋아요, 최근 판매 로그(Recent Sales) 시각화
 
 ### 3. 검색 기능
 - [x] **동적 필터링 (QueryDSL)**: 카테고리, 키워드, 정렬 조건에 따른 검색 엔진 구현
@@ -40,8 +38,8 @@
   - **QueryDSL 최적화**: 복잡한 조인 없이 필요한 데이터만 프로젝션(DTO)하여 조회 속도 개선
 
 ### 5. 성능 및 안정성 (Engineering)
-- [ ] **Redis 분산락**: 선착순 구매 및 재고 차감 시 발생하는 동시성 이슈(Race Condition) 해결
-- [ ] **성능 테스트**: JMeter 활용한 대용량 트래픽 시뮬레이션 및 쿼리 튜닝
+- [x] **Redis 분산락**: 선착순 구매 및 재고 차감 시 발생하는 동시성 이슈(Race Condition) 해결
+- [x] **동시성 검증**: 통합 테스트(Multi-threaded Integration Test) 기반의 100건 이상의 동시 주문 시뮬레이션을 통한 로직 안정성 및 데이터 정합성 확보 확인
 - [ ] **인프라 최적화**: AWS CloudFront + OAC를 통한 S3 버킷 보안 및 콘텐츠 전송 가속화
 
 ---

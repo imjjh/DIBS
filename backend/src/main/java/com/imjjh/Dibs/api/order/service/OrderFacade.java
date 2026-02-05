@@ -1,12 +1,17 @@
 package com.imjjh.Dibs.api.order.service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
 import com.imjjh.Dibs.api.order.dto.request.OrderCreateRequestDto;
+import com.imjjh.Dibs.api.order.exception.OrderErrorCode;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
+import com.imjjh.Dibs.common.exception.BusinessException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,36 +20,41 @@ import lombok.RequiredArgsConstructor;
 public class OrderFacade {
 
     private final OrderService orderService;
-
-    // 상품별 락 객체 (같은 상품만 대기를 위해 사용)
-    // 메모리 누수 발생 가능 상품이 많아지면 키가 무수히 많아질 수 있음 -> (redis ttl)으로 해결
-    private final ConcurrentHashMap<Long, Object> productLocks = new ConcurrentHashMap<>();
+    private final RedissonClient redissonClient;
 
     public void createOrderWithLock(CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
+
+        // 중복 id 제거
         List<Long> sortedProductIds = requestDto.orderItems().stream()
                 .map(item -> item.productId())
-                .distinct()
                 .sorted()
+                .distinct()
                 .toList();
 
-        // 해당 상품에 대한 락 획득
+        // redisson 락 객체 리스트 생성
+        List<RLock> locks = new ArrayList<>();
+        for (Long productId : sortedProductIds) {
+            locks.add(redissonClient.getLock("lock:product:" + productId));
+        }
 
-        executeWithRecursiveLock(0, sortedProductIds, userDetails, requestDto);
+        RLock multiLock = redissonClient.getMultiLock(locks.toArray(new RLock[0]));
 
-    }
+        try {
+            // waitTime만큼 대기(재시도), leaseTime 후에 무조건 락 해제 (안전장치)
+            boolean available = multiLock.tryLock(10, 3, TimeUnit.SECONDS);
 
-    private void executeWithRecursiveLock(int index, List<Long> sortedProductIds, CustomUserDetails userDetails,
-            OrderCreateRequestDto requestDto) {
-        if (index == sortedProductIds.size()) {
+            if (!available) {
+                throw new BusinessException(OrderErrorCode.ORDER_TRAFFIC_EXCEEDED);
+            }
+
             orderService.createOrder(userDetails, requestDto);
-            return;
-        }
-
-        Long productId = sortedProductIds.get(index);
-        Object lock = productLocks.computeIfAbsent(productId, k -> new Object());
-
-        synchronized (lock) {
-            executeWithRecursiveLock(index + 1, sortedProductIds, userDetails, requestDto);
+        } catch (InterruptedException e) {
+            throw new BusinessException(OrderErrorCode.SERVER_ERROR);
+        } finally {
+            if (multiLock.isHeldByCurrentThread()) {
+                multiLock.unlock();
+            }
         }
     }
+
 }

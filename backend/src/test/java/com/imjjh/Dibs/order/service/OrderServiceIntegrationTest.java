@@ -18,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.imjjh.Dibs.api.order.dto.request.OrderCreateRequestDto;
 import com.imjjh.Dibs.api.order.service.OrderFacade;
-import com.imjjh.Dibs.api.order.service.OrderService;
 import com.imjjh.Dibs.api.product.entity.ProductEntity;
 import com.imjjh.Dibs.api.product.entity.StatusType;
 import com.imjjh.Dibs.api.product.repository.ProductRepository;
@@ -27,7 +26,7 @@ import com.imjjh.Dibs.auth.user.RoleType;
 import com.imjjh.Dibs.auth.user.UserEntity;
 import com.imjjh.Dibs.auth.user.repository.UserRepository;
 import com.imjjh.common.annotation.IntegrationTest;
-
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -46,14 +45,23 @@ public class OrderServiceIntegrationTest {
             .withPassword("test")
             .withCommand("--general-log=1", "--general-log-file=/var/lib/mysql/general.log");
 
+    @Container
+    private static final GenericContainer<?> REDIS_CONTAINER = new GenericContainer<>("redis:7.0")
+            .withExposedPorts(6379);
+
     // 컨테이너의 동적 포트와 정보를 스프링 데이터소스에 주입
     @DynamicPropertySource
     static void registerPgProperties(DynamicPropertyRegistry registry) {
+        // Mysql
         registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);
         registry.add("spring.datasource.username", MYSQL_CONTAINER::getUsername);
         registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("spring.jpa.properties.hibernate.dialect", () -> "org.hibernate.dialect.MySQLDialect");
+
+        // Redis
+        registry.add("spring.data.redis.host", REDIS_CONTAINER::getHost);
+        registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379).toString());
     }
 
     @Autowired
@@ -83,11 +91,12 @@ public class OrderServiceIntegrationTest {
             UserEntity buyer = buyerBuilder(String.valueOf(i));
             buyerList.add(buyer);
         }
+        // TODO: 멀티 밸류 인서트가 아님 mysql의 AUTO_INCREMENT를 사용하는 경우 영속성 텍스트 관리 방식과 충돌
         List<UserEntity> savedBuyerList = userRepository.saveAll(buyerList);
 
         // when
         // 쓰레드 생성
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
 
         CountDownLatch latch = new CountDownLatch(savedBuyerList.size());
 
