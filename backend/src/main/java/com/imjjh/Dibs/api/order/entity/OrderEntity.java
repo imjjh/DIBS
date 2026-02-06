@@ -2,6 +2,7 @@ package com.imjjh.Dibs.api.order.entity;
 
 import com.imjjh.Dibs.api.product.exception.ProductErrorCode;
 import com.imjjh.Dibs.auth.user.UserEntity;
+import com.imjjh.Dibs.common.Ownable;
 import com.imjjh.Dibs.common.exception.BusinessException;
 
 import jakarta.persistence.*;
@@ -15,13 +16,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "order_entity")
 @EntityListeners(AuditingEntityListener.class)
-public class OrderEntity {
+public class OrderEntity implements Ownable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,8 +41,6 @@ public class OrderEntity {
     private List<OrderItemEntity> orderItems = new ArrayList<>();
 
     private String orderName; // 주문명 (예: 나이키 신발 외 2건)
-
-    private String paymentUid; // 결제사(PG) 결제 고유 번호
 
     @Column(nullable = false)
     private Long totalPrice; // 총 주문 금액
@@ -78,12 +78,6 @@ public class OrderEntity {
         orderItem.setOrder(this);
     }
 
-    // 상태 변경 메서드
-    public void paymentComplete(String paymentUid) {
-        this.paymentUid = paymentUid;
-        this.status = OrderStatus.PAID;
-    }
-
     public void cancel() {
         this.status = OrderStatus.CANCELLED;
     }
@@ -100,5 +94,25 @@ public class OrderEntity {
                     return price * item.getQuantity();
                 })
                 .sum();
+    }
+
+    @Override
+    public Long getOwnerId() {
+        return this.user.getId();
+    }
+
+    public void updateOrderName() {
+        if (orderItems.isEmpty())
+            return;
+
+        String firstName = orderItems.get(0).getProduct().getName();
+        int size = orderItems.size();
+
+        if (size == 1) {
+            this.orderName = firstName;
+        } else {
+            this.orderName = firstName + " 외 " + (size - 1) + "건";
+
+        }
     }
 }
