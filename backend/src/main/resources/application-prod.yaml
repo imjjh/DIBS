@@ -10,3 +10,7 @@ spring:
     hibernate:
       ddl-auto: validate   # 운영에서는 자동 생성하지 않고 검증만
     show-sql: false
+
+jwt:
+  cookie:
+    secure: true
