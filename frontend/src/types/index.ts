@@ -47,7 +47,6 @@ export interface Product {
     status: ProductStatus;
     imageUrl?: string;
     category?: string;
-    discountRate?: number;
     sellerId?: number;
 }
 
@@ -130,12 +129,11 @@ export interface OrderItemDetailResponse {
     price: number;
     quantity: number;
     imageUrl: string;
-    stockQuantity: number;
     productStatus: ProductStatus;
 }
 
 export interface OrderDetailResponse {
-    orderId: number;
+    id: number;
     orderName: string;
     orderedAt: string;
     status: OrderStatus;
