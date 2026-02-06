@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Package, MapPin, Truck, AlertCircle, ShoppingBag, CreditCard } from 'lucide-react';
@@ -10,7 +10,8 @@ import { OrderDetailResponse, ProductStatus } from '@/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const { isAuthenticated, checkAuth } = useAuthStore();
     const router = useRouter();
     const [order, setOrder] = useState<OrderDetailResponse | null>(null);
@@ -24,12 +25,12 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
         if (isAuthenticated) {
             fetchOrderDetail();
         }
-    }, [isAuthenticated, params.id]);
+    }, [isAuthenticated, id]);
 
     const fetchOrderDetail = async () => {
         try {
             setIsLoading(true);
-            const data = await orderService.getOrder(Number(params.id));
+            const data = await orderService.getOrder(Number(id));
             setOrder(data);
         } catch (error) {
             console.error(error);
@@ -44,8 +45,10 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
         if (!order) return;
         if (!confirm('정말로 주문을 취소하시겠습니까? \n(취소 시 재고가 복구됩니다)')) return;
 
+        const addToCart = confirm('취소한 상품들을 장바구니에 다시 담으시겠습니까?');
+
         try {
-            await orderService.cancelOrder(order.orderId, false);
+            await orderService.cancelOrder(order.id, addToCart);
             alert('주문이 취소되었습니다.');
             fetchOrderDetail(); // Refresh data
         } catch (error) {
@@ -88,7 +91,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                                 </span>
                                 <div className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
                                 <span className="text-sm font-bold text-muted-foreground">
-                                    주문번호 {order.orderId}
+                                    주문번호 {order.id}
                                 </span>
                             </div>
                             <h2 className="text-4xl font-black text-primary mb-2 line-clamp-1">
@@ -145,7 +148,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                                                 </Link>
                                             </div>
                                             <p className="text-muted-foreground font-medium mb-3">
-                                                {item.price.toLocaleString()}원 · {item.quantity}개
+                                                {(item.price || 0).toLocaleString()}원 · {item.quantity || 0}개
                                             </p>
                                             <div className="flex gap-2">
                                                 <span className={cn(
@@ -179,7 +182,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                                 <div className="h-px bg-border my-2" />
                                 <div className="flex justify-between text-lg font-black text-primary">
                                     <span>최종 결제 금액</span>
-                                    <span>{order.totalPrice.toLocaleString()}원</span>
+                                    <span>{(order.totalPrice || 0).toLocaleString()}원</span>
                                 </div>
                             </div>
                         </div>
