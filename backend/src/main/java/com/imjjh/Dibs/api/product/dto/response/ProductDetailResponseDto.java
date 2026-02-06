@@ -4,25 +4,21 @@ import lombok.Builder;
 
 @Builder
 public record ProductDetailResponseDto(
-                Long id,
+        Long id,
 
-                String sellerName,
+        String sellerName,
 
-                String name,
+        String name,
 
-                String description,
+        String description,
 
-                Long price,
+        Long price,
 
-                Long stockQuantity,
+        Long stockQuantity,
 
-                String status,
+        String status,
 
-                String imageUrl,
+        String imageUrl,
 
-                String category,
-
-                Long specialPrice,
-
-                Integer discountRate) {
+        String category) {
 }
