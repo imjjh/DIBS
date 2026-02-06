@@ -55,7 +55,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                                 authCookieProvider.createRefreshTokenCookie(refreshToken).toString());
 
                 // 리다이렉트 수행
-                getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/oauth/callback");
+                String targetUrl = "http://" + request.getServerName() + ":3000/oauth/callback";
+                getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         }
 
