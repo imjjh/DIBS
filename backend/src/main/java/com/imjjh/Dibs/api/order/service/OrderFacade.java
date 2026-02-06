@@ -9,6 +9,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
 import com.imjjh.Dibs.api.order.dto.request.OrderCreateRequestDto;
+import com.imjjh.Dibs.api.order.dto.response.OrderDetailResponseDto;
 import com.imjjh.Dibs.api.order.exception.OrderErrorCode;
 import com.imjjh.Dibs.auth.user.CustomUserDetails;
 import com.imjjh.Dibs.common.exception.BusinessException;
@@ -22,16 +23,34 @@ public class OrderFacade {
     private final OrderService orderService;
     private final RedissonClient redissonClient;
 
+    // 주문 생성
     public void createOrderWithLock(CustomUserDetails userDetails, OrderCreateRequestDto requestDto) {
-
-        // 중복 id 제거
-        List<Long> sortedProductIds = requestDto.orderItems().stream()
+        List<Long> productIds = requestDto.orderItems().stream()
                 .map(item -> item.productId())
-                .sorted()
+                .toList();
+
+        executeWithLock(productIds, () -> orderService.createOrder(userDetails, requestDto));
+    }
+
+    // 주문 취소
+    public void cancelOrderWithLock(CustomUserDetails userDetails, Long orderId, Boolean addToCart) {
+        OrderDetailResponseDto order = orderService.getOrder(userDetails, orderId);
+
+        List<Long> productIds = order.orderItems().stream()
+                .map(item -> item.productId())
+                .filter(id-> id!=null) // 주문 상품(orderItemEntity)은 삭제되지 않았지만 상품(productEntity)는 삭제되어 productId가 null일 수 있음
+                .toList();
+
+        executeWithLock(productIds, () -> orderService.cancelOrder(userDetails, orderId, addToCart));
+    }
+
+    // 락을 걸고 실행
+    private void executeWithLock(List<Long> productIds, Runnable action) {
+        List<Long> sortedProductIds = productIds.stream()
+                .sorted() // 데드락 방지
                 .distinct()
                 .toList();
 
-        // redisson 락 객체 리스트 생성
         List<RLock> locks = new ArrayList<>();
         for (Long productId : sortedProductIds) {
             locks.add(redissonClient.getLock("lock:product:" + productId));
@@ -40,14 +59,14 @@ public class OrderFacade {
         RLock multiLock = redissonClient.getMultiLock(locks.toArray(new RLock[0]));
 
         try {
-            // waitTime만큼 대기(재시도), leaseTime 후에 무조건 락 해제 (안전장치)
+            // 동작 방식 All or nothing
             boolean available = multiLock.tryLock(10, 3, TimeUnit.SECONDS);
 
             if (!available) {
                 throw new BusinessException(OrderErrorCode.ORDER_TRAFFIC_EXCEEDED);
             }
 
-            orderService.createOrder(userDetails, requestDto);
+            action.run();
         } catch (InterruptedException e) {
             throw new BusinessException(OrderErrorCode.SERVER_ERROR);
         } finally {
@@ -56,5 +75,4 @@ public class OrderFacade {
             }
         }
     }
-
 }
