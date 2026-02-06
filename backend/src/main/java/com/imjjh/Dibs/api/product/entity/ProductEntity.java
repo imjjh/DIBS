@@ -62,16 +62,6 @@ public class ProductEntity extends BaseEntity implements Ownable {
     @Schema(description = "신발, 의류 등")
     private String category;
 
-    @Column
-    @Setter
-    @Schema(description = "타임딜 가격 저장용")
-    private Long specialPrice;
-
-    @Column
-    @Setter
-    @Schema(description = "화면에 표시될 할인률")
-    private Integer discountRate;
-
     @Builder
     public ProductEntity(UserEntity seller, String name, String description,
             Long price, Long stockQuantity,
@@ -83,10 +73,7 @@ public class ProductEntity extends BaseEntity implements Ownable {
         this.stockQuantity = stockQuantity;
         this.imageUrl = imageUrl;
         this.category = category;
-
-        this.specialPrice = 0L;
-        this.discountRate = 0;
-        this.status = StatusType.PREPARING;
+        this.status = (stockQuantity>0) ? StatusType.ON_SALE: StatusType.SOLD_OUT;
     }
 
     @Override
@@ -110,6 +97,9 @@ public class ProductEntity extends BaseEntity implements Ownable {
             throw new BusinessException(ProductErrorCode.NO_STOCK_QUANTITY);
         }
         this.stockQuantity -= quantity;
+        if (stockQuantity == 0) {
+            this.status=StatusType.SOLD_OUT;
+        }
     }
 
     /**
@@ -119,5 +109,8 @@ public class ProductEntity extends BaseEntity implements Ownable {
      */
     public void addStock(Long quantity) {
         this.stockQuantity += quantity;
+        if (this.status == StatusType.SOLD_OUT && this.stockQuantity > 0) {
+            this.status = StatusType.ON_SALE;
+        }
     }
 }
