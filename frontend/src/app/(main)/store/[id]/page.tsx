@@ -177,7 +177,6 @@ export default function ProductDetailPage() {
         );
     }
 
-    const discountedPrice = product.discountRate ? product.price * (1 - product.discountRate / 100) : product.price;
 
     return (
         <div className="min-h-screen bg-background pb-32">
@@ -217,13 +216,6 @@ export default function ProductDetailPage() {
                             )}
 
                             {/* Badges */}
-                            <div className="absolute top-8 left-8 flex flex-col gap-3">
-                                {product.discountRate !== undefined && product.discountRate > 0 && (
-                                    <div className="px-5 py-2 bg-red-600 text-white text-xs font-black rounded-2xl tracking-widest shadow-2xl">
-                                        {product.discountRate}% OFF
-                                    </div>
-                                )}
-                            </div>
                         </div>
 
                     </div>
@@ -248,18 +240,9 @@ export default function ProductDetailPage() {
                         {/* Price & Status */}
                         <div className="p-10 bg-secondary/20 rounded-[3rem] border border-border space-y-8">
                             <div className="flex items-end justify-between">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        {product.discountRate !== undefined && product.discountRate > 0 && (
-                                            <span className="text-xl font-bold text-red-500 line-through opacity-50">
-                                                {product.price.toLocaleString()}₩
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-5xl font-black tracking-tighter">
-                                        {discountedPrice.toLocaleString()} <span className="text-2xl">원</span>
-                                    </p>
-                                </div>
+                                <p className="text-5xl font-black tracking-tighter">
+                                    {product.price.toLocaleString()} <span className="text-2xl">원</span>
+                                </p>
                                 <div className={cn(
                                     "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg",
                                     product.status === ProductStatus.ON_SALE ? "bg-emerald-500 text-white" :

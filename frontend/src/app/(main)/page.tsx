@@ -132,11 +132,6 @@ export default function Home() {
                                     className="group flex flex-col bg-card rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
                                 >
                                     <div className="aspect-[1/1] relative overflow-hidden">
-                                        {item.discountRate !== undefined && item.discountRate > 0 && (
-                                            <div className="absolute top-4 left-4 z-10 bg-primary text-primary-foreground text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-tighter">
-                                                -{item.discountRate}%
-                                            </div>
-                                        )}
                                         <Image
                                             src={(item.imageUrl && item.imageUrl.trim() !== "") ? item.imageUrl : 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop'}
                                             alt={item.name || "Product Image"}
@@ -162,11 +157,6 @@ export default function Home() {
                                             <span className="text-xl font-black text-foreground">
                                                 {item.price.toLocaleString()}₩
                                             </span>
-                                            {item.discountRate !== undefined && item.discountRate > 0 && (
-                                                <span className="text-xs text-muted-foreground line-through font-bold">
-                                                    {(item.price / (1 - item.discountRate / 100)).toLocaleString()}
-                                                </span>
-                                            )}
                                         </div>
                                     </div>
                                 </Link>

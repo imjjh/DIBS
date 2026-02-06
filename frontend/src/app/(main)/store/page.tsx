@@ -192,11 +192,6 @@ export default function StorePage() {
 
                                             {/* Status Overlays */}
                                             <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                                {product.discountRate !== undefined && product.discountRate > 0 && (
-                                                    <div className="px-3 py-1 bg-red-600 text-white text-[10px] font-black rounded-lg tracking-widest flex items-center gap-1 shadow-lg">
-                                                        <Zap className="w-3 h-3" /> {product.discountRate}% OFF
-                                                    </div>
-                                                )}
                                                 {product.status === ProductStatus.SOLD_OUT && (
                                                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
                                                         <span className="text-xl font-black text-white border-2 border-white px-4 py-1 rotate-[-12deg]">SOLD OUT</span>
@@ -230,11 +225,6 @@ export default function StorePage() {
                                             <h3 className="text-xl font-black tracking-tight leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
                                             <div className="flex items-baseline gap-2">
                                                 <span className="text-2xl font-black">{product.price.toLocaleString()}원</span>
-                                                {product.discountRate !== undefined && product.discountRate > 0 && (
-                                                    <span className="text-sm font-bold text-muted-foreground line-through opacity-50">
-                                                        {(Number(product.price) * (1 + product.discountRate / 100)).toLocaleString()}원
-                                                    </span>
-                                                )}
                                             </div>
 
                                         </div>
