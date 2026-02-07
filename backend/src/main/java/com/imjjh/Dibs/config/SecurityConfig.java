@@ -24,11 +24,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import java.util.List;
 import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true)
+@Profile("!prod")
 public class SecurityConfig {
 
         private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
