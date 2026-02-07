@@ -1,0 +1,13 @@
+{$DOMAIN_NAME} {
+    # 모든 외부 요청을 프론트엔드(Next.js) 컨테이너로 전달
+    # Next.js BFF가 내부망에 있는 백엔드와 통신하여 데이터를 처리합니다.
+    reverse_proxy * frontend:3000
+
+    # 웹 성능 최적화 (Gzip 압축)
+    encode gzip
+
+    # 로그 설정 (바인드 마운트를 통해 호스트에서 확인 가능)
+    log {
+        output file /var/log/caddy/access.log
+    }
+}
