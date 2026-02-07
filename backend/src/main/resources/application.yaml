@@ -74,3 +74,7 @@ jwt:
   refresh-expiration: 1209600000
   cookie:
     secure: false # dev, local
+
+storage:
+  cloudfront:
+    domain: ${CLOUDFRONT_DOMAIN:http://localhost:8080}

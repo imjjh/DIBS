@@ -22,3 +22,7 @@ spring:
 jwt:
   cookie:
     secure: true
+
+storage:
+  cloudfront:
+    domain: https://${CLOUDFRONT_DOMAIN}

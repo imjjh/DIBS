@@ -17,10 +17,14 @@ public class S3Service {
 
     private final S3Template s3Template;
     private final String bucket;
+    private final String cfDomain;
 
-    public S3Service(S3Template s3Template, @Value("${spring.cloud.aws.s3.bucket}") String bucket) {
+    public S3Service(S3Template s3Template,
+            @Value("${spring.cloud.aws.s3.bucket}") String bucket,
+            @Value("${storage.cloudfront.domain}") String cfDomain) {
         this.s3Template = s3Template;
         this.bucket = bucket;
+        this.cfDomain = cfDomain;
     }
 
     public String uploadFile(MultipartFile file) {
@@ -31,9 +35,10 @@ public class S3Service {
 
         try {
             // S3 업로드
-            var S3Resource = s3Template.upload(bucket, fileName, file.getInputStream());
+            s3Template.upload(bucket, fileName, file.getInputStream());
 
-            return S3Resource.getURL().toString();
+            // CloudFront URL 반환
+            return cfDomain + "/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("s3 파일 업로드 실패", e);
         }
