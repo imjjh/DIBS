@@ -1,12 +1,17 @@
 {$DOMAIN_NAME} {
-    # 모든 외부 요청을 프론트엔드(Next.js) 컨테이너로 전달
-    # Next.js BFF가 내부망에 있는 백엔드와 통신하여 데이터를 처리합니다.
+    # 1. 파일 업로드 크기 제한 (최대 10MB)
+    # 백엔드(5MB)보다 조금 더 여유 있게 잡아 대문에서 1차로 걸러냅니다.
+    request_body {
+        max_size 10MB
+    }
+
+    # 2. 모든 요청을 프론트엔드(Next.js)로 전달
     reverse_proxy * frontend:3000
 
-    # 웹 성능 최적화 (Gzip 압축)
+    # 3. 웹 성능 최적화 (Gzip 압축)
     encode gzip
 
-    # 로그 설정 (바인드 마운트를 통해 호스트에서 확인 가능)
+    # 4. 로그 설정 (공격 징후 파악 및 디버깅용)
     log {
         output file /var/log/caddy/access.log
     }

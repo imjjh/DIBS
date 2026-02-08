@@ -78,3 +78,17 @@ jwt:
 storage:
   cloudfront:
     domain: ${CLOUDFRONT_DOMAIN:http://localhost:8080}
+
+bucket4j:
+  enabled: true
+  cache-to-use: jcache
+  filters:
+    - cache-name: buckets
+      filter-method: servlet
+      url: /api/.*
+      rate-limits:
+        - cache-key: "getRemoteAddr()"
+          bandwidths:
+            - capacity: 5
+              time: 1
+              unit: seconds
