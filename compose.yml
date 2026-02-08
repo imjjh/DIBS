@@ -73,7 +73,6 @@ services:
     environment:
       - NODE_ENV=production
       - BACKEND_API_URL=http://backend:8080 # 서버 사이드 통신용
-      - NEXT_PUBLIC_API_URL=https://${DOMAIN_NAME}/api # 클라이언트 사이드 통신용
 
   # 5. Reverse Proxy (Caddy)
   caddy:
@@ -88,6 +87,8 @@ services:
       - ./logs/caddy:/var/log/caddy
       - caddy_data:/data
       - caddy_config:/config
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
     depends_on:
       - frontend
       - backend

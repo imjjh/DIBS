@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_S3_HOSTNAME || '',
+        hostname: '*.cloudfront.net',
       },
     ],
   },
