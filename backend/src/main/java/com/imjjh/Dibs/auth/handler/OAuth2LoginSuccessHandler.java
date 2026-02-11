@@ -14,6 +14,7 @@ import com.imjjh.Dibs.common.util.AuthCookieProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 
@@ -25,6 +26,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         private final JwtTokenProvider jwtTokenProvider;
         private final RefreshTokenRepository refreshTokenRepository;
         private final AuthCookieProvider authCookieProvider;
+
+        @Value("${app.frontend-url}")
+        private String frontendUrl;
 
         public void onAuthenticationSuccess(
                         HttpServletRequest request,
@@ -55,7 +59,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                                 authCookieProvider.createRefreshTokenCookie(refreshToken).toString());
 
                 // 리다이렉트 수행
-                String targetUrl = "http://" + request.getServerName() + ":3000/oauth/callback";
+                String targetUrl = frontendUrl + "/oauth/callback";
                 getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         }

@@ -75,6 +75,9 @@ jwt:
   cookie:
     secure: false # dev, local
 
+app:
+  frontend-url: http://localhost:3000
+
 storage:
   cloudfront:
     domain: ${CLOUDFRONT_DOMAIN:http://localhost:8080}

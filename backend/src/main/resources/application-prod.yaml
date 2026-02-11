@@ -28,6 +28,12 @@ jwt:
   cookie:
     secure: true
 
+app:
+  frontend-url: https://${DOMAIN_NAME}
+
+server:
+  forward-headers-strategy: native
+
 storage:
   cloudfront:
     domain: https://${CLOUDFRONT_DOMAIN}

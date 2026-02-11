@@ -66,6 +66,7 @@ public class SecurityConfig {
                                                 // 로그인 이전 허용 페이지
                                                 // 소셜 로그인 관련 URL과 로그인 페이지
                                                 .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**",
+                                                                "/api/login/**",
                                                                 "/swagger-ui/**", "/v3/api-docs/**")
                                                 .permitAll()
                                                 // 상품 조회 페이지
@@ -74,6 +75,8 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated())
 
                                 .oauth2Login(oauth2 -> oauth2
+                                                .redirectionEndpoint(redirection -> redirection
+                                                                .baseUri("/api/login/oauth2/code/*"))
                                                 .userInfoEndpoint(userInfo -> userInfo
                                                                 .userService(customOAuth2UserService))
                                                 .successHandler(oAuth2LoginSuccessHandler)
