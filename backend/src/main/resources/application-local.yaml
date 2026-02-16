@@ -14,6 +14,10 @@ spring:
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
 
+  data:
+    redis:
+      host: localhost
+      port: 6380
 
 logging:
   level:
