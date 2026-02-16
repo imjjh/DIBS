@@ -14,7 +14,7 @@ import javax.cache.spi.CachingProvider;
 @EnableCaching
 public class RateLimitConfig {
 
-    @Bean(name = "rateLimitCacheManager")
+    @Bean
     public CacheManager rateLimitCacheManager(RedissonClient redissonClient) {
         // Redisson 기반의 JCache 제공자 로드
         CachingProvider provider = Caching.getCachingProvider();
