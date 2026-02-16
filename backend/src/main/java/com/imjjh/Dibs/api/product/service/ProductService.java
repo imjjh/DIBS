@@ -18,6 +18,8 @@ import com.imjjh.Dibs.common.exception.BusinessException;
 import com.imjjh.Dibs.common.service.S3Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,7 @@ public class ProductService {
      * @param id
      * @return
      */
+    @Cacheable(value = "product", key = "#p0", unless = "#result==null")
     @Transactional(readOnly = true)
     public ProductDetailResponseDto getProduct(Long id) {
         ProductEntity productEntity = productRepository.findById(id)
@@ -88,6 +91,7 @@ public class ProductService {
      * @param requestDto
      * @return
      */
+    @CacheEvict(value = "product", key = "#id")
     @Transactional
     public ProductDetailResponseDto updateProduct(CustomUserDetails userDetails, Long id,
             ProductUpdateRequestDto requestDto) {
@@ -116,6 +120,7 @@ public class ProductService {
      * @param userDetails
      * @param id
      */
+    @CacheEvict(value = "product", key = "#id")
     @Transactional
     public void deleteProduct(CustomUserDetails userDetails, Long id) {
         ProductEntity productEntity = productRepository.findById(id)
