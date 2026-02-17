@@ -13,11 +13,12 @@ import javax.cache.spi.CachingProvider;
 @Configuration
 @EnableCaching
 public class RateLimitConfig {
+    private static final String REDISSON_JCACHE_PROVIDER = "org.redisson.jcache.JCachingProvider";
 
     @Bean
     public CacheManager rateLimitCacheManager(RedissonClient redissonClient) {
         // Redisson 기반의 JCache 제공자 로드
-        CachingProvider provider = Caching.getCachingProvider();
+        CachingProvider provider = Caching.getCachingProvider(REDISSON_JCACHE_PROVIDER);
         CacheManager manager = provider.getCacheManager();
 
         // Bucket4j에서 사용할 'buckets'라는 이름의 캐시 영역 생성

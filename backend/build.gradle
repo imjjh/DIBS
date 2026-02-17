@@ -29,7 +29,7 @@ dependencies {
 	// Redis & Cache & 분산락
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
-implementation 'org.redisson:redisson-spring-boot-starter:3.43.0'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.43.0'
 
 	// mysql
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -159,4 +159,3 @@ tasks.withType(JavaCompile) {
 tasks.named('clean'){
 	delete file(generatedDir)
 }
-
